@@ -15,8 +15,10 @@ import {
 import { ArchiveBox, CircleDashed, MagnifyingGlass } from "phosphor-react";
 import { faker } from "@faker-js/faker";
 import React from "react";
-import { ChatList } from "../../data";
+// import { ChatList } from "../../../../../chat-app/src/data";
+// import { SimpleBarStyle } from "../../../../../chat-app/src/components/Scrollbar";
 import { SimpleBarStyle } from "../../components/Scrollbar";
+import { ChatList } from "../../data";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
