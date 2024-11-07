@@ -1,38 +1,28 @@
-const sgMail = require("@sendgrid/mail");
+const nodemailer = require("nodemailer");
 
-sgMail.setApiKey(process.env.SG_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "phuctruong.310103@gmail.com",
+    pass: process.env.GM_TOKEN,
+  },
+});
 
-const sendSGMail = async ({
-  to,
-  sender,
-  subject,
-  html,
-  attachments,
-  text,
-}) => {
-  try {
-    const from = "shreyanshshah242@gmail.com";
-
-    const msg = {
-      to: to, // Change to your recipient
-      from: from, // Change to your verified sender
-      subject: subject,
-      html: html,
-      // text: text,
-      attachments,
-    };
-
-    
-    return sgMail.send(msg);
-  } catch (error) {
-    console.log(error);
-  }
+const mailOptions = {
+  from: "phuctruong.310103@gmail.com",
+  to: "21521300@gm.uit.edu.vn",
+  subject: "Hello",
+  text: "Hello from Nodemailer using Google App Password!",
 };
 
+
+
+
 exports.sendEmail = async (args) => {
-  if (!process.env.NODE_ENV === "development") {
-    return Promise.resolve();
-  } else {
-    return sendSGMail(args);
-  }
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+    console.log("Email sent: " + info.response);
+  });
 };
