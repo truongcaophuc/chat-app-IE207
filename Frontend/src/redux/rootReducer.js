@@ -6,7 +6,7 @@ import appReducer from "./slices/app";
 const rootPeristConfig = {
   key: "root",
   storage,
-  keyprefix: "redux-",
+  keyPrefix: "redux-",
   //   whitelist:[]
   //   blacklist:[]
 };
