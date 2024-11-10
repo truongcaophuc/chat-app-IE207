@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { faker } from "@faker-js/faker";
 import {
   Avatar,
@@ -19,10 +20,24 @@ import {
   Note,
   PencilCircle,
 } from "phosphor-react";
-import React from "react";
+import Shortcuts from "../../sections/settings/Shortcuts";
 
 const Settings = () => {
   const theme = useTheme();
+
+  const [openShortcuts, setOpenShortcuts] = useState(false);
+
+  console.log(openShortcuts);
+
+  const handleOpenShortcuts = () => {
+    setOpenShortcuts(true);
+    console.log(openShortcuts);
+  };
+
+  const handleCloseShortcuts = () => {
+    setOpenShortcuts(false);
+    console.log(openShortcuts);
+  };
 
   const list = [
     {
@@ -66,8 +81,8 @@ const Settings = () => {
       key: 6,
       icon: <Keyboard size={20} />,
       title: "Keyboard Shortcuts",
-      //   onclick: handleOpenShortcuts,
-      onclick: () => {},
+      onclick: handleOpenShortcuts,
+      // onclick: () => {},
     },
     {
       key: 7,
@@ -122,7 +137,7 @@ const Settings = () => {
                   <Stack
                     spacing={2}
                     sx={{ cursor: "pointer" }}
-                    onclick={onclick}
+                    onClick={onclick}
                   >
                     <Stack direction={"row"} spacing={2} alignItems={"center"}>
                       {icon}
@@ -135,8 +150,11 @@ const Settings = () => {
             </Stack>
           </Stack>
         </Box>
-        {/* LeftPanel */}
+        {/* RightPanel */}
       </Stack>
+      {openShortcuts && (
+        <Shortcuts open={openShortcuts} handleClose={handleCloseShortcuts} />
+      )}
     </>
   );
 };

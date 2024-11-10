@@ -1,0 +1,27 @@
+import { Divider, IconButton, Stack } from "@mui/material";
+import { GoogleLogo } from "phosphor-react";
+import React from "react";
+
+const AuthSocial = () => {
+  return (
+    <div>
+      <Divider
+        sx={{
+          my: 2.5,
+          typography: "overline",
+          color: "text.disable",
+          "&::before, ::after": { borderTopStyle: "dashed" },
+        }}
+      >
+        OR
+      </Divider>
+      <Stack direction={"row"} justifyContent={"center"} spacing={2}>
+        <IconButton>
+          <GoogleLogo color="" />
+        </IconButton>
+      </Stack>
+    </div>
+  );
+};
+
+export default AuthSocial;
