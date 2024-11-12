@@ -19,7 +19,7 @@ const Profile_Menu = [
     icon: <Gear />,
   },
   {
-    title: "Profile",
+    title: "Sign Out",
     icon: <SignOut />,
   },
 ];
@@ -43,6 +43,152 @@ const Nav_Setting = [
   {
     index: 3,
     icon: <GearSix />,
+  },
+];
+
+const MemberList = [
+  {
+    id: 0,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+  },
+  {
+    id: 1,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+  },
+  {
+    id: 2,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+  },
+  {
+    id: 3,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+  },
+  {
+    id: 4,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+  },
+  {
+    id: 5,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+  },
+];
+
+const CallLogs = [
+  {
+    id: 0,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
+  },
+  {
+    id: 1,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: false,
+    missed: true,
+  },
+  {
+    id: 2,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: true,
+    missed: true,
+  },
+  {
+    id: 3,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: false,
+    missed: false,
+  },
+  {
+    id: 4,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
+  },
+  {
+    id: 5,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: false,
+    missed: false,
+  },
+  {
+    id: 6,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
+  },
+  {
+    id: 7,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: false,
+    missed: false,
+  },
+  {
+    id: 8,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
+  },
+  {
+    id: 9,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: false,
+    missed: false,
+  },
+  {
+    id: 10,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
+  },
+  {
+    id: 11,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: false,
+    incoming: false,
+    missed: false,
+  },
+  {
+    id: 12,
+    img: faker.image.avatar(),
+    name: faker.name.firstName(),
+    online: true,
+    incoming: true,
+    missed: false,
   },
 ];
 
@@ -220,11 +366,81 @@ const Message_options = [
   },
 ];
 
+const SHARED_DOCS = [
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+];
+
+const SHARED_LINKS = [
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+];
+
 export {
   Profile_Menu,
   Nav_Setting,
   Nav_Buttons,
   ChatList,
+  MemberList,
+  CallLogs,
   Chat_History,
   Message_options,
+  SHARED_DOCS,
+  SHARED_LINKS,
 };
