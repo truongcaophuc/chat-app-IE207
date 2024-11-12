@@ -95,12 +95,14 @@ const CallElement = ({ online }) => {
             {/* <Typography variant="caption">{msg}</Typography> */}
           </Stack>
         </Stack>
-        <IconButton>
-          <Phone color="green" />
-        </IconButton>
-        <IconButton>
-          <VideoCamera color="green" />
-        </IconButton>
+        <Stack direction={"row"} spacing={2} alignItems={"center"}>
+          <IconButton>
+            <Phone color="green" />
+          </IconButton>
+          <IconButton>
+            <VideoCamera color="green" />
+          </IconButton>
+        </Stack>
       </Stack>
     </Box>
   );
