@@ -15,25 +15,23 @@ import {
 } from "../../components/Search";
 import { MagnifyingGlass, Plus } from "phosphor-react";
 import { SimpleBarStyle } from "../../components/Scrollbar";
-import { ChatList } from "../../data";
-import ChatElement from "../../components/ChatElement";
-import CreateGroup from "../../sections/main/CreateGroup";
-
-const Group = () => {
+import { CallLogElement } from "../../components/CallElement";
+import { CallLogs } from "../../data";
+import StartCall from "../../sections/main/StartCall";
+const Call = () => {
   const theme = useTheme();
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-
   return (
     <>
+      {" "}
       <Stack direction={"row"} sx={{ width: "100%" }}>
         {/* Left */}
         <Box
           sx={{
-            overflowY: "scroll",
             height: "100vh",
             width: 320,
             backgroundColor:
@@ -49,7 +47,7 @@ const Group = () => {
               justifyContent="space-between"
               direction="row"
             >
-              <Typography variant="h5">Groups</Typography>
+              <Typography variant="h5">Call Log</Typography>
             </Stack>
             <Stack sx={{ width: "100%" }}>
               <Search>
@@ -68,7 +66,7 @@ const Group = () => {
               justifyContent={"space-between"}
             >
               <Typography variant="subtitle2" component={Link}>
-                Create New Group
+                Start new converstaion
               </Typography>
               <IconButton
                 onClick={() => {
@@ -89,18 +87,10 @@ const Group = () => {
                   <Typography variant="subtitle2" sx={{ color: "#676767" }}>
                     Pinned
                   </Typography>
-                  {/* Chat Lists */}
-                  {ChatList.filter((el) => el.pinned).map((el) => {
-                    return <ChatElement {...el} />;
-                  })}
-                  {/*  */}
-                  <Typography variant="subtitle2" sx={{ color: "#676767" }}>
-                    All Groups
-                  </Typography>
-                  {/* Chat Lists */}
-                  {ChatList.filter((el) => !el.pinned).map((el) => {
-                    return <ChatElement {...el} />;
-                  })}
+                  {/* Call Logs */}
+                  {CallLogs.map((el) => (
+                    <CallLogElement {...el} />
+                  ))}
                 </Stack>
               </SimpleBarStyle>
             </Stack>
@@ -110,10 +100,10 @@ const Group = () => {
         {/* TODO = Conversation component */}
       </Stack>
       {openDialog && (
-        <CreateGroup open={openDialog} handleClose={handleCloseDialog} />
+        <StartCall open={openDialog} handleClose={handleCloseDialog} />
       )}
     </>
   );
 };
 
-export default Group;
+export default Call;
