@@ -9,7 +9,6 @@ const Profile = () => {
       <Stack direction={"row"} sx={{ width: "100%" }}>
         <Box
           sx={{
-            overflowY: "scroll",
             height: "100vh",
             width: 320,
             backgroundColor: (theme) =>

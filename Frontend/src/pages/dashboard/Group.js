@@ -33,7 +33,6 @@ const Group = () => {
         {/* Left */}
         <Box
           sx={{
-            overflowY: "scroll",
             height: "100vh",
             width: 320,
             backgroundColor:
