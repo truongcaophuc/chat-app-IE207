@@ -46,46 +46,7 @@ const Nav_Setting = [
   },
 ];
 
-const MemberList = [
-  {
-    id: 0,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: true,
-  },
-  {
-    id: 1,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: true,
-  },
-  {
-    id: 2,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: false,
-  },
-  {
-    id: 3,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: true,
-  },
-  {
-    id: 4,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: false,
-  },
-  {
-    id: 5,
-    img: faker.image.avatar(),
-    name: faker.name.firstName(),
-    online: true,
-  },
-];
-
-const CallLogs = [
+const CallList = [
   {
     id: 0,
     img: faker.image.avatar(),
@@ -366,7 +327,35 @@ const Message_options = [
   },
 ];
 
-const SHARED_DOCS = [
+const Shared_docs = [
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    message: "Yes sure, here you go.",
+    incoming: true,
+    outgoing: false,
+  },
   {
     type: "msg",
     subtype: "doc",
@@ -397,7 +386,23 @@ const SHARED_DOCS = [
   },
 ];
 
-const SHARED_LINKS = [
+const Shared_links = [
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.cats(),
+    message: "Yep, I can also do that",
+    incoming: true,
+    outgoing: false,
+  },
   {
     type: "msg",
     subtype: "link",
@@ -437,10 +442,9 @@ export {
   Nav_Setting,
   Nav_Buttons,
   ChatList,
-  MemberList,
-  CallLogs,
   Chat_History,
   Message_options,
-  SHARED_DOCS,
-  SHARED_LINKS,
+  Shared_links,
+  Shared_docs,
+  CallList,
 };
