@@ -1,9 +1,8 @@
-import { Link, Stack, Typography } from "@mui/material";
+import { Stack, Typography, Link } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { CaretLeft } from "phosphor-react";
-
 import React from "react";
-import ResetPasswordForm from "../../sections/auth/ResetPasswordForm";
+import { CaretLeft } from "phosphor-react";
+import AuthResetPasswordForm from "../../sections/auth/ResetPasswordForm";
 
 const ResetPassword = () => {
   return (
@@ -20,8 +19,7 @@ const ResetPassword = () => {
       </Stack>
 
       {/* Reset Password Form */}
-      {/* <AuthResetPasswordForm /> */}
-      <ResetPasswordForm />
+      <AuthResetPasswordForm />
 
       <Link
         component={RouterLink}
