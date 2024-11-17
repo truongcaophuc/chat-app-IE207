@@ -1,88 +1,65 @@
-import React from "react";
 import * as Yup from "yup";
-import { useForm } from "react-hook-form";
+// form
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  Alert,
-  Button,
-  IconButton,
-  InputAdornment,
-  Link,
-  Stack,
-} from "@mui/material";
+import { useForm } from "react-hook-form";
+// components
 import FormProvider, { RHFTextField } from "../../components/hook-form";
+import { Button } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { ForgotPassword } from "../../redux/slices/auth";
+import { LoadingButton } from "@mui/lab";
 
-const ResetPasswordForm = () => {
+// ----------------------------------------------------------------------
+
+export default function AuthResetPasswordForm() {
+  const { isLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const ResetPasswordSchema = Yup.object().shape({
     email: Yup.string()
       .required("Email is required")
       .email("Email must be a valid email address"),
   });
 
-  const defaultValues = {
-    email: "demo@tawk.com",
-  };
-
   const methods = useForm({
     resolver: yupResolver(ResetPasswordSchema),
-    defaultValues,
+    defaultValues: { email: "demo@tawk.com" },
   });
 
-  const {
-    reset,
-    setError,
-    handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-  } = methods;
+  const { handleSubmit } = methods;
 
   const onSubmit = async (data) => {
     try {
-      // submit data to backend
+      //   Send API Request
+      dispatch(ForgotPassword(data));
     } catch (error) {
-      console.log(error);
-      reset();
-      setError("afterSubmit", {
-        ...error,
-        message: error.message,
-      });
+      console.error(error);
     }
   };
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={3}>
-        {!!errors.afterSubmit && (
-          <Alert security="error">{errors.afterSubmit.message}</Alert>
-        )}
+      <RHFTextField name="email" label="Email address" />
 
-        <RHFTextField name="email" lable="Email address" />
-        <Button
-          fullWidth
-          color="inherit"
-          size="large"
-          type="submit"
-          variant="contained"
-          sx={{
+      <LoadingButton
+        loading={isLoading}
+        fullWidth
+        size="large"
+        type="submit"
+        variant="contained"
+        sx={{
+          mt: 3,
+          bgcolor: "text.primary",
+          color: (theme) =>
+            theme.palette.mode === "light" ? "common.white" : "grey.800",
+          "&:hover": {
             bgcolor: "text.primary",
             color: (theme) =>
               theme.palette.mode === "light" ? "common.white" : "grey.800",
-            "&hover": {
-              bgcolor: "text.primary",
-              color: (theme) =>
-                theme.palette.mode === "light" ? "common.white" : "grey.800",
-            },
-          }}
-        >
-          Send Request
-        </Button>
-      </Stack>
-      {/* <Stack alignItems={"flex-end"} sx={{ my: 2 }}>
-        <Link variant="body2" color={"inherit"} underline="always">
-          Forgot Password?
-        </Link>
-      </Stack> */}
+          },
+        }}
+      >
+        Send Request
+      </LoadingButton>
     </FormProvider>
   );
-};
-
-export default ResetPasswordForm;
+}

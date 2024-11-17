@@ -12,7 +12,7 @@ import {
   Link,
   Stack,
 } from "@mui/material";
-import FormProvider, { RHFTextField } from "../../components/hook-form";
+import FormProvider, { RHFTextField } from "../../../components/hook-form";
 import { Eye, EyeSlash } from "phosphor-react";
 
 const ProfileForm = () => {
