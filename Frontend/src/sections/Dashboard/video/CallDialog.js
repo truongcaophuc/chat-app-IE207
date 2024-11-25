@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "../../../utils/axios";
 import { socket } from "../../../socket";
 import { ResetVideoCallQueue } from "../../../redux/slices/videoCall";
-
+//04AAAAAGc/+V4AEGJmZzd2a2txdjNibGt6b3QAwKELciuNhLxYowCzMk4ny+6U/p0G9jNIZ8uWrEK51dq9A86d1uUoNtm5Z6Rmyl4au6tK6mI6vRq7cWh6HxwGGJpdiv+ZuXSTwWO211pFIyYPNZY0XpA8QB02biU4D176crbfNwUd3bck1h8wfuEn8RTHfbSbSGdbbr8vB32/gmnQZ+HJw+PrqxdFDz+bjyXah1c6DbaSsVaZuG8t+4GNoU/gTanNIx0WBQm0uy0TIyXvyWvpp4yS9QWjfHoJteA3/A==
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -30,8 +30,8 @@ const CallDialog = ({ open, handleClose }) => {
 
   const { token } = useSelector((state) => state.auth);
 
-  const appID = 1642584767;
-  const server = "wss://webliveroom1642584767-api.coolzcloud.com/ws";
+  const appID = 507490280;
+  const server = "wss://webliveroom507490280-api.coolzcloud.com/ws";
 
   // roomID => ID of conversation => current_conversation.id
   // token => generate on backend & get on App
@@ -45,7 +45,9 @@ const CallDialog = ({ open, handleClose }) => {
   // Step 1
 
   // Initialize the ZegoExpressEngine instance
+  
   const zg = new ZegoExpressEngine(appID, server);
+
 
   const audioStreamID = `audio_${call_details?.streamID}`;
   const videoStreamID = `video_${call_details?.streamID}`;
@@ -124,7 +126,7 @@ const CallDialog = ({ open, handleClose }) => {
 
     // make a POST API call to server & fetch token
 
-    let this_token;
+    let this_token
 
     async function fetchToken() {
       // You can await here
@@ -143,6 +145,7 @@ const CallDialog = ({ open, handleClose }) => {
       );
       console.log(response, "TOKEN RESPONSE");
       this_token = response.data.token;
+      console.log("this_token là :",this_token)
       // ...
     }
     fetchToken();
@@ -162,20 +165,29 @@ const CallDialog = ({ open, handleClose }) => {
         //   screenSharing: true,
         //   errInfo: {}
         // }
-        console.log(result);
-
+        console.log("Kết quả kiểm tra",result);
+        console.log("thẻ video là",document.getElementById("local-video"))
+        console.log("Room id là :",roomID)
+        console.log("this_token là :",this_token)
+        console.log("userID là :",userID)
+        console.log("userName là :",userName)
         const { webRTC, microphone, camera } = result;
 
         if (webRTC && microphone && camera) {
+          console.log("Room có mã số là :",roomID)
+          console.log("Thuộc tính",Object.getOwnPropertyNames(zg));
           zg.loginRoom(
             roomID,
-            this_token,
+           this_token,
             { userID, userName },
             { userUpdate: true }
           )
             .then(async (result) => {
+              
+              // zg.enablePreviewMirror(false); // Tắt lật hình khi xem trước
+              // zg.enableCaptureMirror(false); // Tắt lật hình khi gửi đến người nhận
               console.log(result);
-
+              console.log("Tôi đã login phòng thành công")
               // After calling the CreateStream method, you need to wait for the ZEGOCLOUD server to return the local stream object before any further operation.
               const localAudioStream = await zg.createStream({
                 camera: { audio: true, video: false },
@@ -190,10 +202,13 @@ const CallDialog = ({ open, handleClose }) => {
               // Get the audio tag.
               const localAudio = document.getElementById("local-audio");
               const localVideo = document.getElementById("local-video");
+              console.log("Thẻ video là:", localVideo)
               // The local stream is a MediaStream object. You can render audio by assigning the local stream to the srcObject property of video or audio.
               localAudio.srcObject = localAudioStream;
               localVideo.srcObject = localVideoStream;
-
+              localVideo.style.transform = "scaleX(-1)"; 
+             // const localView=zg.createLocalStreamView(localVideoStream)
+             // localView.play("local-video",{objectFit: true})
               localVideo.play();
 
               // localStream is the MediaStream object created by calling creatStream in the previous step.
@@ -215,12 +230,14 @@ const CallDialog = ({ open, handleClose }) => {
               });
             })
             .catch((error) => {
+              console.log("đã bị lỗi khi kết nối room")
               console.log(error);
             });
 
           // Callback for updates on the current user's room connection status.
           zg.on("roomStateUpdate", (roomID, state, errorCode, extendedData) => {
             if (state === "DISCONNECTED") {
+              console.log("Kết nối thất bại")
               // Disconnected from the room
               // * Can be used to show disconnected status for a user (especially useful in a group call)
             }
@@ -231,6 +248,7 @@ const CallDialog = ({ open, handleClose }) => {
             }
 
             if (state === "CONNECTED") {
+              console.log("Đã kết nối vào phòng")
               // Connected to the room
               // * Can be used to show connected status for a user (especially useful in a group call)
             }
@@ -264,6 +282,7 @@ const CallDialog = ({ open, handleClose }) => {
 
               remoteAudio.srcObject = remoteAudioStream;
               remoteVideo.srcObject = remoteVideoStream;
+              remoteVideo.style.transform = "scaleX(-1)"; 
               remoteAudio.play();
               remoteVideo.play();
             }
@@ -329,7 +348,7 @@ const CallDialog = ({ open, handleClose }) => {
           <Stack direction="row" spacing={24} p={2}>
             <Stack>
               <video
-                style={{ height: 200, width: 200 }}
+                style={{ height: 200, width: 200}}
                 id="local-video"
                 controls={false}
               />

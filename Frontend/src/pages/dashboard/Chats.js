@@ -34,14 +34,14 @@ const user_id = window.localStorage.getItem("user_id");
 const Chats = () => {
   const theme = useTheme();
   const isDesktop = useResponsive("up", "md");
-
+  console.log("đã vào")
   const dispatch = useDispatch();
 
   const {conversations} = useSelector((state) => state.conversation.direct_chat);
 
   useEffect(() => {
     socket.emit("get_direct_conversations", { user_id }, (data) => {
-      console.log(data); // this data is the list of conversations
+      console.log("Dữ liệu data là :",data); // this data is the list of conversations
       // dispatch action
 
       dispatch(FetchDirectConversations({ conversations: data }));
@@ -117,22 +117,16 @@ const Chats = () => {
             </Stack>
             <Divider />
           </Stack>
-          <Stack sx={{ flexGrow: 1, overflow: "scroll", height: "100%" }}>
+          <Stack sx={{ flexGrow: 1, overflowY: "scroll", height: "100%" }}>
             <SimpleBarStyle timeout={500} clickOnTrack={false}>
               <Stack spacing={2.4}>
-                {/* <Typography variant="subtitle2" sx={{ color: "#676667" }}>
-                  Pinned
-                </Typography> */}
-                {/* Chat List */}
-                {/* {ChatList.filter((el) => el.pinned).map((el, idx) => {
-                  return <ChatElement {...el} />;
-                })} */}
+               
                 <Typography variant="subtitle2" sx={{ color: "#676667" }}>
-                  All Chats
+                  Tất cả
                 </Typography>
                 {/* Chat List */}
-                {conversations.filter((el) => !el.pinned).map((el, idx) => {
-                  return <ChatElement {...el} />;
+                {conversations?.filter((el) => !el.pinned).map((el, idx) => {
+                  return <ChatElement {...el} key={idx}/>;
                 })}
               </Stack>
             </SimpleBarStyle>

@@ -24,8 +24,14 @@ import useResponsive from "../../hooks/useResponsive";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { socket } from "../../socket";
-import { useSelector } from "react-redux";
-
+import {  useDispatch, useSelector } from "react-redux";
+import {
+  UpdateDirectConversation,
+  AddDirectConversation,
+  AddDirectMessage,
+  UpdateUserStatus,
+  SortConversation
+} from "../../redux/slices/conversation";
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
     paddingTop: "12px !important",
@@ -95,8 +101,8 @@ const ChatInput = ({
                 display: openActions ? "inline-block" : "none",
               }}
             >
-              {Actions.map((el) => (
-                <Tooltip placement="right" title={el.title}>
+              {Actions.map((el, index) => (
+                <Tooltip placement="right" title={el.title} key={index}>
                   <Fab
                     onClick={() => {
                       setOpenActions(!openActions);
@@ -158,8 +164,8 @@ function containsUrl(text) {
 
 const Footer = () => {
   const theme = useTheme();
-
-  const { current_conversation } = useSelector(
+  const dispatch = useDispatch();
+  const { current_conversation,conversations } = useSelector(
     (state) => state.conversation.direct_chat
   );
 
@@ -260,6 +266,9 @@ const Footer = () => {
                     to: current_conversation.user_id,
                     type: containsUrl(value) ? "Link" : "Text",
                   });
+                  console.log("đã phát đi tin nhắn")
+                //  dispatch(SortConversation({room_id,conversations}))
+                  setValue("")
                 }}
               >
                 <PaperPlaneTilt color="#ffffff" />

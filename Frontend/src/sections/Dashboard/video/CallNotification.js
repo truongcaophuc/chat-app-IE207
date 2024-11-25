@@ -52,13 +52,13 @@ const CallNotification = ({ open, handleClose }) => {
             <Stack>
               <Avatar
                 sx={{ height: 100, width: 100 }}
-                src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${call_details?.from_user?.avatar}`}
+                src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
               />
             </Stack>
             <Stack>
               <Avatar
                 sx={{ height: 100, width: 100 }}
-                src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${user?.avatar}`}
+                src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
               />
             </Stack>
           </Stack>

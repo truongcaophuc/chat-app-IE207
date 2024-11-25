@@ -70,8 +70,15 @@ const ChatHeader = () => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
 
-  const {current_conversation} = useSelector((state) => state.conversation.direct_chat);
-
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const { conversations } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const statusUser = conversations.find(
+    (conversation) => conversation.id === current_conversation?.id
+  )?.online;
   const [conversationMenuAnchorEl, setConversationMenuAnchorEl] =
     React.useState(null);
   const openConversationMenu = Boolean(conversationMenuAnchorEl);
@@ -109,25 +116,34 @@ const ChatHeader = () => {
             direction="row"
           >
             <Box>
-              <StyledBadge
-                overlap="circular"
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "right",
-                }}
-                variant="dot"
-              >
+              {statusUser ? (
+                <StyledBadge
+                  overlap="circular"
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  variant="dot"
+                >
+                  <Avatar
+                    alt={current_conversation?.name}
+                    src={current_conversation?.img}
+                  />
+                </StyledBadge>
+              ) : (
                 <Avatar
                   alt={current_conversation?.name}
                   src={current_conversation?.img}
                 />
-              </StyledBadge>
+              )}
             </Box>
             <Stack spacing={0.2}>
               <Typography variant="subtitle2">
                 {current_conversation?.name}
               </Typography>
-              <Typography variant="caption">Online</Typography>
+              <Typography variant="caption">
+                {statusUser ? "Online" : "Offline"}
+              </Typography>
             </Stack>
           </Stack>
           <Stack
@@ -135,14 +151,15 @@ const ChatHeader = () => {
             alignItems="center"
             spacing={isMobile ? 1 : 3}
           >
-            <IconButton onClick={() => {
-              dispatch(StartVideoCall(current_conversation.user_id));
-            }}>
+            <IconButton
+              onClick={() => {
+                dispatch(StartVideoCall(current_conversation.user_id));
+              }}
+            >
               <VideoCamera />
             </IconButton>
             <IconButton
               onClick={() => {
-                
                 dispatch(StartAudioCall(current_conversation.user_id));
               }}
             >
@@ -188,8 +205,8 @@ const ChatHeader = () => {
             >
               <Box p={1}>
                 <Stack spacing={1}>
-                  {Conversation_Menu.map((el) => (
-                    <MenuItem onClick={handleCloseConversationMenu}>
+                  {Conversation_Menu.map((el, index) => (
+                    <MenuItem onClick={handleCloseConversationMenu} key={index}>
                       <Stack
                         sx={{ minWidth: 100 }}
                         direction="row"
@@ -206,8 +223,6 @@ const ChatHeader = () => {
           </Stack>
         </Stack>
       </Box>
-
-      
     </>
   );
 };

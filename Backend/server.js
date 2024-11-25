@@ -49,22 +49,27 @@ server.listen(port, () => {
 // Add this
 // Listen for when the client connects via socket.io-client
 io.on("connection", async (socket) => {
-  console.log(JSON.stringify(socket.handshake.query));
+  //console.log(JSON.stringify(socket.handshake.query));
   const user_id = socket.handshake.query["user_id"];
 
-  console.log(`User connected ${socket.id}`);
-
+  // console.log(`User connected ${socket.id}`);
+  // console.log("user_id là", user_id);
   if (user_id != null && Boolean(user_id)) {
     try {
-      User.findByIdAndUpdate(user_id, {
+     await User.findByIdAndUpdate(user_id, {
         socket_id: socket.id,
         status: "Online",
       });
+      console.log("đã cập nhật trạng thái thành công")
+      io.emit("user_status_update", { _id:user_id, status:"Online"})
     } catch (e) {
       console.log(e);
     }
   }
-
+  socket.on("user_status_update", (data) => {
+    // TODO => dispatch an action to add this in call_queue
+    dispatch(UpdateUserStatus(data));
+  });
   // We can write our socket event listeners in here...
   socket.on("friend_request", async (data) => {
     const to = await User.findById(data.to).select("socket_id");
@@ -119,9 +124,9 @@ io.on("connection", async (socket) => {
       participants: { $all: [user_id] },
     }).populate("participants", "firstName lastName avatar _id email status");
 
-    // db.books.find({ authors: { $elemMatch: { name: "John Smith" } } })
+   
 
-    console.log(existing_conversations);
+    // console.log("Các cuộc họp hiện tại là: ",existing_conversations);
 
     callback(existing_conversations);
   });
@@ -137,7 +142,7 @@ io.on("connection", async (socket) => {
       participants: { $size: 2, $all: [to, from] },
     }).populate("participants", "firstName lastName _id email status");
 
-    console.log(existing_conversations[0], "Existing Conversation");
+   // console.log(existing_conversations[0], "Existing Conversation");
 
     // if no => create a new OneToOneMessage doc & emit event "start_chat" & send conversation details as payload
     if (existing_conversations.length === 0) {
@@ -150,7 +155,7 @@ io.on("connection", async (socket) => {
         "firstName lastName _id email status"
       );
 
-      console.log(new_chat);
+      //console.log(new_chat);
 
       socket.emit("start_chat", new_chat);
     }
@@ -162,6 +167,7 @@ io.on("connection", async (socket) => {
 
   socket.on("get_messages", async (data, callback) => {
     try {
+      console.log("Có yêu cầu lấy dữ liệu")
       const { messages } = await OneToOneMessage.findById(
         data.conversation_id
       ).select("messages");
@@ -181,7 +187,7 @@ io.on("connection", async (socket) => {
 
     const to_user = await User.findById(to);
     const from_user = await User.findById(from);
-
+    console.log("to_user là:", to_user)
     // message => {to, from, type, created_at, text, file}
 
     const new_message = {
@@ -449,13 +455,14 @@ io.on("connection", async (socket) => {
 
   // -------------- HANDLE SOCKET DISCONNECTION ----------------- //
 
-  socket.on("end", async (data) => {
+  socket.on("disconnect", async (data) => {
     // Find user by ID and set status as offline
 
-    if (data.user_id) {
-      await User.findByIdAndUpdate(data.user_id, { status: "Offline" });
+    if (user_id) {
+      await User.findByIdAndUpdate(user_id, { status: "Offline" });
+      io.emit("user_status_update", { _id:user_id, status: "Offline" });
     }
-
+    else{console.log("User not found")}
     // broadcast to all conversation rooms of this user that this user is offline (disconnected)
 
     console.log("closing connection");

@@ -4,12 +4,12 @@ import { enUS, frFR, zhCN, viVN, arSD } from '@mui/material/locale';
 // routes
 import { PATH_DASHBOARD } from "./routes/paths";
 
-export const BASE_URL = "https://api.chat.codingmonk.in/";
+export const BASE_URL = "http://localhost:4000/";
 
-export const S3_BUCKET_NAME = 'x';
-export const AWS_ACCESS_KEY = 'x';
-export const AWS_SECRET_ACCESS_KEY = 'x/x+CSg5';
-export const AWS_S3_REGION = 'ap-x-1'; // eg. ap-south-1
+export const S3_BUCKET_NAME = 'thanhcong';
+export const AWS_ACCESS_KEY = 'thatbai';
+export const AWS_SECRET_ACCESS_KEY = 'vaiga';
+export const AWS_S3_REGION = 'thoidi'; // eg. ap-south-1
 
 export const defaultSettings = {
   themeMode: "light",

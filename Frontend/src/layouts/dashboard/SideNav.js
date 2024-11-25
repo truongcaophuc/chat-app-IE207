@@ -87,9 +87,9 @@ const SideBar = () => {
             alignItems={"center"}
             spacing={3}
           >
-            {Nav_Buttons.map((el) => {
+            {Nav_Buttons.map((el,index) => {
               return el.index == selectedTab ? (
-                <Box
+                <Box key={index}
                   sx={{
                     backgroundColor: theme.palette.primary.main,
                     borderRadius: 1.5,
@@ -123,7 +123,7 @@ const SideBar = () => {
               );
             })}
             <Divider sx={{ width: 48 }} />
-            {Nav_Setting.map((el) => {
+            {Nav_Setting.map((el,index) => {
               return el.index == selectedTab ? (
                 <Box
                   sx={{
@@ -131,6 +131,7 @@ const SideBar = () => {
                     borderRadius: 1.5,
                   }}
                   p={1}
+                  key={index}
                 >
                   <IconButton
                     onClick={() => {

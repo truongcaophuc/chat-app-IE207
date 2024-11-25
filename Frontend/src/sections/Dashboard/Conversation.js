@@ -57,7 +57,7 @@ const MessageOption = () => {
 const TextMsg = ({ el, menu }) => {
   const theme = useTheme();
   return (
-    <Stack direction="row" justifyContent={el.incoming ? "start" : "end"}>
+    <Stack direction="row" justifyContent={el.incoming ? "start" : "end"} alignItems={"center"}>
       <Box
         px={1.5}
         py={1.5}

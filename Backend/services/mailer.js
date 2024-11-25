@@ -8,18 +8,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const mailOptions = {
-  from: "phuctruong.310103@gmail.com",
-  to: "21521300@gm.uit.edu.vn",
-  subject: "Hello",
-  text: "Hello from Nodemailer using Google App Password!",
-};
+
 
 
 
 
 exports.sendEmail = async (args) => {
-  transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(args, (error, info) => {
     if (error) {
       return console.log(error);
     }

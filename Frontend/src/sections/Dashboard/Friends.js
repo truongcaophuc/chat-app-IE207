@@ -16,9 +16,10 @@ const UsersList = () => {
   const dispatch = useDispatch();
 
   const { users } = useSelector((state) => state.app);
-
+  console.log("đã phát fetch user")
   useEffect(() => {
     dispatch(FetchUsers());
+    console.log("đã phát fetch user rôi")
   }, []);
 
   return (

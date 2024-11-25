@@ -90,6 +90,7 @@ const UserElement = ({ img, firstName, lastName, online, _id }) => {
         <Stack direction={"row"} spacing={2} alignItems={"center"}>
           <Button
             onClick={() => {
+              console.log("đã gửi lời mời kết bạn")
               socket.emit("friend_request", { to: _id, from: user_id }, () => {
                 alert("request sent");
               });

@@ -44,14 +44,14 @@ exports.getUsers = catchAsync(async (req, res, next) => {
   const all_users = await User.find({
     verified: true,
   }).select("firstName lastName _id");
-
   const this_user = req.user;
 
-  const remaining_users = all_users.filter(
-    (user) =>
+  const remaining_users = all_users.filter((user) => {
+    return (
       !this_user.friends.includes(user._id) &&
-      user._id.toString() !== req.user._id.toString()
-  );
+      !user._id.equals(this_user._id)
+    );
+  });
 
   res.status(200).json({
     status: "success",
@@ -108,7 +108,8 @@ exports.generateZegoToken = catchAsync(async (req, res, next) => {
   try {
     const { userId, room_id } = req.body;
 
-    console.log(userId, room_id, "from generate zego token");
+    console.log("app id là :",appID)
+    console.log(room_id, "from generate zego token");
 
     const effectiveTimeInSeconds = 3600; //type: number; unit: s; token expiration time, unit: second
     const payloadObject = {
@@ -130,17 +131,22 @@ exports.generateZegoToken = catchAsync(async (req, res, next) => {
       effectiveTimeInSeconds,
       payload
     );
+    console.log("token là :",token)
+    console.log("appid là :",appID*1)
+    console.log("servert là :",serverSecret)
+    console.log("userid là :",userId)
     res.status(200).json({
       status: "success",
       message: "Token generated successfully",
       token,
     });
   } catch (err) {
-    console.log(err);
+    console.log("CÓ lỗi",err);
   }
 });
 
 exports.startAudioCall = catchAsync(async (req, res, next) => {
+  console.log("yêu cầu goi dien")
   const from = req.user._id;
   const to = req.body.id;
 

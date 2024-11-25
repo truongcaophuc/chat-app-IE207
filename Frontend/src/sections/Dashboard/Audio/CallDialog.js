@@ -36,8 +36,8 @@ const CallDialog = ({ open, handleClose }) => {
 
   const { token } = useSelector((state) => state.auth);
 
-  const appID = 1642584767;
-  const server = "wss://webliveroom1642584767-api.coolzcloud.com/ws";
+  const appID = 507490280;
+  const server = "wss://webliveroom507490280-api.coolzcloud.com/ws";
 
   // roomID => ID of conversation => current_conversation.id
   // token => generate on backend & get on App
@@ -316,14 +316,14 @@ const CallDialog = ({ open, handleClose }) => {
             <Stack>
               <Avatar
                 sx={{ height: 100, width: 100 }}
-                src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${call_details?.from_user?.avatar}`}
+                src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
               />
               <audio id="local-audio" controls={false} />
             </Stack>
             <Stack>
               <Avatar
                 sx={{ height: 100, width: 100 }}
-                src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${user?.avatar}`}
+                src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
               />
               <audio id="remote-audio" controls={false} />
             </Stack>

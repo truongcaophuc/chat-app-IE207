@@ -123,7 +123,9 @@ export function UpdateTab(tab) {
 }
 
 export function FetchUsers() {
+  console.log("vai")
   return async (dispatch, getState) => {
+    console.log("token là :",getState().auth.token)
     await axios
       .get(
         "/user/get-users",
@@ -136,7 +138,7 @@ export function FetchUsers() {
         }
       )
       .then((response) => {
-        console.log(response);
+        console.log("Thông tin user là :",response.data);
         dispatch(slice.actions.updateUsers({ users: response.data.data }));
       })
       .catch((err) => {
@@ -262,21 +264,21 @@ export const UpdateUserProfile = (formValues) => {
     const key = v4();
 
     try{
-      S3.getSignedUrl(
-        "putObject",
-        { Bucket: S3_BUCKET_NAME, Key: key, ContentType: `image/${file.type}` },
-        async (_err, presignedURL) => {
-          await fetch(presignedURL, {
-            method: "PUT",
+      // S3.getSignedUrl(
+      //   "putObject",
+      //   { Bucket: S3_BUCKET_NAME, Key: key, ContentType: `image/${file.type}` },
+      //   async (_err, presignedURL) => {
+      //     await fetch(presignedURL, {
+      //       method: "PUT",
   
-            body: file,
+      //       body: file,
   
-            headers: {
-              "Content-Type": file.type,
-            },
-          });
-        }
-      );
+      //       headers: {
+      //         "Content-Type": file.type,
+      //       },
+      //     });
+      //   }
+      // );
     }
     catch(error) {
       console.log(error);

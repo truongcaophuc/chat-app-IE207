@@ -25,7 +25,7 @@ const ProfileForm = () => {
   const defaultValues = {
     firstName: user?.firstName,
     about: user?.about,
-    avatar: `https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${user?.avatar}`,
+    avatar: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
   };
 
   const methods = useForm({

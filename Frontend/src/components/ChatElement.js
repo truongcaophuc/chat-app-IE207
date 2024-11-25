@@ -4,6 +4,7 @@ import { styled, useTheme, alpha } from "@mui/material/styles";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { SelectConversation } from "../redux/slices/app";
+import { UpdateDirectConversation } from "../redux/slices/conversation";
 
 const truncateText = (string, n) => {
   return string?.length > n ? `${string?.slice(0, n)}...` : string;
@@ -49,7 +50,7 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   const {room_id} = useSelector((state) => state.app);
   const selectedChatId = room_id?.toString();
 
-  let isSelected = +selectedChatId === id;
+  let isSelected = selectedChatId === id;
 
   if (!selectedChatId) {
     isSelected = false;
@@ -60,7 +61,11 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   return (
     <StyledChatBox
       onClick={() => {
+        console.log("đã chọn")
+        console.log(id)
         dispatch(SelectConversation({room_id: id}));
+        //dispatch(UpdateDirectConversation({}))
+        
       }}
       sx={{
         width: "100%",
@@ -97,11 +102,11 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
-            <Typography variant="caption">{truncateText(msg, 20)}</Typography>
+            <Typography variant="caption"sx={{color:unread?"black":"#878787"}}>{truncateText(msg, 20)}</Typography>
           </Stack>
         </Stack>
-        <Stack spacing={2} alignItems={"center"}>
-          <Typography sx={{ fontWeight: 600 }} variant="caption">
+        <Stack spacing={2} alignItems={"center"}justifyContent="center" sx={{ height: "100%" }}>
+          <Typography sx={{ fontWeight: 600,color:unread?"black":"#878787" }} variant="caption">
             {time}
           </Typography>
           <Badge

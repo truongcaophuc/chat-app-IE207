@@ -1,15 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { Stack } from "@mui/material";
 import { Navigate, Outlet } from "react-router-dom";
 import useResponsive from "../../hooks/useResponsive";
 import SideNav from "./SideNav";
 import { useDispatch, useSelector } from "react-redux";
-import { FetchUserProfile, SelectConversation, showSnackbar } from "../../redux/slices/app";
+import {
+  FetchUserProfile,
+  SelectConversation,
+  showSnackbar,
+} from "../../redux/slices/app";
 import { socket, connectSocket } from "../../socket";
 import {
   UpdateDirectConversation,
   AddDirectConversation,
   AddDirectMessage,
+  UpdateUserStatus,
+  SortConversation,
 } from "../../redux/slices/conversation";
 import AudioCallNotification from "../../sections/dashboard/Audio/CallNotification";
 import VideoCallNotification from "../../sections/dashboard/video/CallNotification";
@@ -19,12 +25,15 @@ import {
 } from "../../redux/slices/audioCall";
 import AudioCallDialog from "../../sections/dashboard/Audio/CallDialog";
 import VideoCallDialog from "../../sections/dashboard/video/CallDialog";
-import { PushToVideoCallQueue, UpdateVideoCallDialog } from "../../redux/slices/videoCall";
+import {
+  PushToVideoCallQueue,
+  UpdateVideoCallDialog,
+} from "../../redux/slices/videoCall";
 
 const DashboardLayout = () => {
   const isDesktop = useResponsive("up", "md");
   const dispatch = useDispatch();
-  const {user_id} = useSelector((state) => state.auth);
+  const { user_id } = useSelector((state) => state.auth);
   const { open_audio_notification_dialog, open_audio_dialog } = useSelector(
     (state) => state.audioCall
   );
@@ -39,7 +48,6 @@ const DashboardLayout = () => {
   useEffect(() => {
     dispatch(FetchUserProfile());
   }, []);
-  
 
   const handleCloseAudioDialog = () => {
     dispatch(UpdateAudioCallDialog({ state: false }));
@@ -47,7 +55,6 @@ const DashboardLayout = () => {
   const handleCloseVideoDialog = () => {
     dispatch(UpdateVideoCallDialog({ state: false }));
   };
-
   useEffect(() => {
     if (isLoggedIn) {
       window.onload = function () {
@@ -61,13 +68,19 @@ const DashboardLayout = () => {
 
       if (!socket) {
         connectSocket(user_id);
+        socket.on("connect", () => {
+          console.log("Kết nối thành công tới socket có id là: ", socket.id);
+        });
       }
-
+      socket.on("user_status_update", (data) => {
+        // TODO => dispatch an action to add this in call_queue
+        dispatch(UpdateUserStatus(data));
+      });
       socket.on("audio_call_notification", (data) => {
         // TODO => dispatch an action to add this in call_queue
         dispatch(PushToAudioCallQueue(data));
       });
-      
+
       socket.on("video_call_notification", (data) => {
         // TODO => dispatch an action to add this in call_queue
         dispatch(PushToVideoCallQueue(data));
@@ -75,20 +88,36 @@ const DashboardLayout = () => {
 
       socket.on("new_message", (data) => {
         const message = data.message;
-        console.log(current_conversation, data);
-        // check if msg we got is from currently selected conversation
-        if (current_conversation?.id === data.conversation_id) {
-          dispatch(
-            AddDirectMessage({
+        console.log("nhận được tin nhắn");
+        console.log(data);
+
+        console.log(current_conversation);
+        dispatch(
+          SortConversation({
+            room_id: data.conversation_id,
+            conversations,
+          })
+        );
+        dispatch(
+          UpdateDirectConversation({
+            conversation: data.conversation_id,
+            msg: message,
+          })
+        );
+
+        dispatch(
+          AddDirectMessage({
+            message: {
               id: message._id,
               type: "msg",
               subtype: message.type,
               message: message.text,
               incoming: message.to === user_id,
               outgoing: message.from === user_id,
-            })
-          );
-        }
+            },
+            data,
+          })
+        );
       });
 
       socket.on("start_chat", (data) => {

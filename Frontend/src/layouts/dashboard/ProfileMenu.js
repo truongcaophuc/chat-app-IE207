@@ -26,7 +26,7 @@ const ProfileMenu = () => {
   const user_id = window.localStorage.getItem("user_id");
 
   const user_name = user?.firstName;
-  const user_img = `https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${user?.avatar}`;
+  const user_img = `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`;
 
   return (
     <>
@@ -61,7 +61,7 @@ const ProfileMenu = () => {
         <Box p={1}>
           <Stack spacing={1}>
             {Profile_Menu.map((el, idx) => (
-              <MenuItem onClick={handleClose}>
+              <MenuItem onClick={handleClose} key={idx}>
                 <Stack
                   onClick={() => {
                     if(idx === 0) {

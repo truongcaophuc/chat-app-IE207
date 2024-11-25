@@ -1,12 +1,36 @@
-class AppError extends Error {
-    constructor(message, statusCode) {
-      super(message);
-  
-      this.statusCode = statusCode;
-      this.status = `${statusCode}`.startsWith("4") ? "fail" : "err";
-      this.isOperational = true;
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-  
-  module.exports = AppError;
+const mongoose = require("mongoose");
+
+const audioCallSchema = new mongoose.Schema({
+  participants: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+    },
+  ],
+  from: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
+  to: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
+  verdict: {
+    type: String,
+    enum: ["Accepted", "Denied", "Missed", "Busy"],
+  },
+  status: {
+    type: String,
+    enum: ["Ongoing", "Ended"],
+  },
+  startedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  endedAt: {
+    type: Date,
+  },
+});
+
+const AudioCall = new mongoose.model("AudioCall", audioCallSchema);
+module.exports = AudioCall;

@@ -81,10 +81,10 @@ const CallLogElement = ({ img, name, incoming, missed, online, id }) => {
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${img}`} />
+              <Avatar alt={name} src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`} />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={`https://${S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${img}`} />
+            <Avatar alt={name} src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`} />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
