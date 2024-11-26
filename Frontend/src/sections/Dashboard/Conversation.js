@@ -7,6 +7,7 @@ import {
   MenuItem,
   IconButton,
   Divider,
+  Avatar,
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { DotsThreeVertical, DownloadSimple, Image } from "phosphor-react";
@@ -15,7 +16,7 @@ import { Link } from "react-router-dom";
 import truncateString from "../../utils/truncate";
 import { LinkPreview } from "@dhaiwat10/react-link-preview";
 import Embed from "react-embed";
-
+import { useDispatch, useSelector } from "react-redux";
 const MessageOption = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -56,26 +57,49 @@ const MessageOption = () => {
 
 const TextMsg = ({ el, menu }) => {
   const theme = useTheme();
+  const { current_conversation, conversations } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const { current_messages } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  let is_last_message =
+    current_messages.indexOf(el) === current_messages.length - 1;
+  const new_conversation = conversations.find(
+    (conversation) => conversation.id === current_conversation.id
+  );
   return (
-    <Stack direction="row" justifyContent={el.incoming ? "start" : "end"} alignItems={"center"}>
-      <Box
-        px={1.5}
-        py={1.5}
-        sx={{
-          backgroundColor: el.incoming
-            ? alpha(theme.palette.background.default, 1)
-            : theme.palette.primary.main,
-          borderRadius: 1.5,
-          width: "max-content",
-        }}
-      >
-        <Typography
-          variant="body2"
-          color={el.incoming ? theme.palette.text : "#fff"}
+    <Stack
+      direction="row"
+      justifyContent={el.incoming ? "start" : "end"}
+      alignItems={"center"}
+    >
+      <Stack direction="column" alignItems={"end"}>
+        <Box
+          px={1.5}
+          py={1.5}
+          sx={{
+            backgroundColor: el.incoming
+              ? alpha(theme.palette.background.default, 1)
+              : theme.palette.primary.main,
+            borderRadius: 1.5,
+            width: "max-content",
+          }}
         >
-          {el.message}
-        </Typography>
-      </Box>
+          <Typography
+            variant="body2"
+            color={el.incoming ? theme.palette.text : "#fff"}
+          >
+            {el.message}
+          </Typography>
+        </Box>
+        {is_last_message && new_conversation.isSeen && el.outgoing && (
+          <Avatar
+            src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
+            sx={{width:"20px",height:"20px"}}
+          />
+        )}
+      </Stack>
       {menu && <MessageOption />}
     </Stack>
   );
@@ -240,6 +264,9 @@ const ReplyMsg = ({ el, menu }) => {
           >
             {el.reply}
           </Typography>
+          <Avatar
+            src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
+          />
         </Stack>
       </Box>
       {menu && <MessageOption />}

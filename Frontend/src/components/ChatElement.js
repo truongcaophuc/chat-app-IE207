@@ -4,12 +4,16 @@ import { styled, useTheme, alpha } from "@mui/material/styles";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { SelectConversation } from "../redux/slices/app";
-import { UpdateDirectConversation } from "../redux/slices/conversation";
-
+import { UpdateMessageStatus } from "../redux/slices/conversation";
+import { socket } from "../socket";
 const truncateText = (string, n) => {
   return string?.length > n ? `${string?.slice(0, n)}...` : string;
 };
-
+const getFirstLetter=(str)=>{
+    const words=str.trim().split(" ")
+    const new_words=words.map((word)=>word[0].toUpperCase())
+    return new_words.join("")
+}
 const StyledChatBox = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
@@ -47,9 +51,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   const dispatch = useDispatch();
-  const {room_id} = useSelector((state) => state.app);
+  const { room_id,name_avatar } = useSelector((state) => state.app);
+  const { conversations } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
   const selectedChatId = room_id?.toString();
-
+  const conversation = conversations.find(
+    (conversation) => conversation.id === id
+  );
   let isSelected = selectedChatId === id;
 
   if (!selectedChatId) {
@@ -61,11 +70,19 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   return (
     <StyledChatBox
       onClick={() => {
-        console.log("đã chọn")
-        console.log(id)
-        dispatch(SelectConversation({room_id: id}));
-        //dispatch(UpdateDirectConversation({}))
-        
+        console.log("đã chọn");
+        console.log(id);
+        dispatch(SelectConversation({ room_id: id }));
+        if (conversation.unread != 0) {
+          console.log("Ta đã phát sự kiện")
+          dispatch(
+            UpdateMessageStatus({ conversation_id: id, type: "Message viewed" })
+          );
+          socket.emit("message_seen", {
+            conversation_id: id,
+            from: conversation.user_id,
+          });
+        }
       }}
       sx={{
         width: "100%",
@@ -95,18 +112,31 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={img} />
+              <Avatar alt={name} src={""}>{getFirstLetter(name)}</Avatar>
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={img} />
+            <Avatar alt={name} src={""}>{getFirstLetter(name)}</Avatar>
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
-            <Typography variant="caption"sx={{color:unread?"black":"#878787"}}>{truncateText(msg, 20)}</Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: unread ? "black" : "#878787" }}
+            >
+              {truncateText(msg, 20)}
+            </Typography>
           </Stack>
         </Stack>
-        <Stack spacing={2} alignItems={"center"}justifyContent="center" sx={{ height: "100%" }}>
-          <Typography sx={{ fontWeight: 600,color:unread?"black":"#878787" }} variant="caption">
+        <Stack
+          spacing={2}
+          alignItems={"center"}
+          justifyContent="center"
+          sx={{ height: "100%" }}
+        >
+          <Typography
+            sx={{ fontWeight: 600, color: unread ? "black" : "#878787" }}
+            variant="caption"
+          >
             {time}
           </Typography>
           <Badge

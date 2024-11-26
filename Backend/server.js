@@ -176,6 +176,19 @@ io.on("connection", async (socket) => {
       console.log(error);
     }
   });
+  socket.on("message_seen", async (data, callback) => {
+    try {
+      await OneToOneMessage.updateMany(
+        { _id: data.conversation_id }, // Điều kiện lọc
+        { $set: { "messages.$[msg].is_read": true } }, // Cập nhật với identifier
+        { arrayFilters: [{ "msg.is_read": false }] } // Lọc các phần tử trong mảng
+      );
+      const from_user = await User.findById(data.from);
+      socket.to(from_user?.socket_id).emit("seen_message_notification",{...data})
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   // Handle incoming text/link messages
   socket.on("text_message", async (data) => {
@@ -352,7 +365,7 @@ io.on("connection", async (socket) => {
   // handle start_video_call event
   socket.on("start_video_call", async (data) => {
     const { from, to, roomID } = data;
-
+    console.log("yêu cầu gọi video")
     console.log(data);
 
     const to_user = await User.findById(to);

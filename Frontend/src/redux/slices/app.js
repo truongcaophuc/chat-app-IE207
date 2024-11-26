@@ -5,7 +5,6 @@ import {v4} from 'uuid';
 import S3 from "../../utils/s3";
 import { S3_BUCKET_NAME } from "../../config";
 // ----------------------------------------------------------------------
-
 const initialState = {
   user: {},
   sideBar: {
@@ -26,6 +25,7 @@ const initialState = {
   chat_type: null,
   room_id: null,
   call_logs: [],
+  name_avatar:""
 };
 
 const slice = createSlice({

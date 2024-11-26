@@ -9,7 +9,11 @@ import { LogoutUser } from "../../redux/slices/auth";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
 import { AWS_S3_REGION, S3_BUCKET_NAME } from "../../config";
-
+const getFirstLetter=(str)=>{
+  const words=str.trim().split(" ")
+  const new_words=words.map((word)=>word[0].toUpperCase())
+  return new_words.join("")
+}
 const ProfileMenu = () => {
   const {user} = useSelector((state) => state.app);
   const navigate = useNavigate();
@@ -25,7 +29,7 @@ const ProfileMenu = () => {
 
   const user_id = window.localStorage.getItem("user_id");
 
-  const user_name = user?.firstName;
+  const user_name = user?.firstName+" "+user?.lastName;
   const user_img = `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`;
 
   return (
@@ -36,9 +40,11 @@ const ProfileMenu = () => {
         aria-haspopup="true"
         aria-expanded={openMenu ? "true" : undefined}
         alt={user_name}
-        src={user_img}
+        src={""}
         onClick={handleClick}
-      />
+      >
+        {getFirstLetter(user_name)}
+        </Avatar>
       <Menu
         MenuListProps={{
           "aria-labelledby": "fade-button",

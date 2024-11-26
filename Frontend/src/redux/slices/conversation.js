@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import { AWS_S3_REGION, S3_BUCKET_NAME } from "../../config";
 import { format, isThisYear, isToday, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import { socket } from "../../socket";
 const user_id = window.localStorage.getItem("user_id");
 const getMessageTime = (timestamp) => {
   const date = new Date(timestamp);
@@ -44,8 +45,8 @@ const slice = createSlice({
     fetchDirectConversations(state, action) {
       const sort_message = action.payload.conversations?.sort(
         (a, b) =>
-          new Date(b.messages.slice(-1)[0].created_at) -
-          new Date(a.messages.slice(-1)[0].created_at)
+          new Date(b.messages.slice(-1)[0]?.created_at) -
+          new Date(a.messages.slice(-1)[0]?.created_at)
       ); // Sắp xếp theo thời gian giảm dần
       const list = sort_message.map((el) => {
         const user = el.participants.find(
@@ -54,6 +55,12 @@ const slice = createSlice({
         const time = getMessageTime(
           el.messages[el.messages.length - 1].created_at
         );
+        const unread_message_count = el.messages.filter(
+          (message) => !message.is_read && message.to === user_id
+        ).length;
+        const not_seen_message_count = el.messages.filter(
+          (message) => !message.is_read && message.to !== user_id
+        ).length;
         return {
           id: el._id,
           user_id: user?._id,
@@ -62,9 +69,10 @@ const slice = createSlice({
           img: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
           msg: el.messages.slice(-1)[0].text,
           time: time,
-          unread: 0,
+          unread: unread_message_count,
           pinned: false,
           about: user?.about,
+          isSeen: not_seen_message_count ? false : true,
         };
       });
 
@@ -132,6 +140,21 @@ const slice = createSlice({
           conversation.online = action.payload.status === "Online";
       });
     },
+    updateMessageStatus(state, action) {
+      console.log("tôi vàoo rồi");
+      console.log(action.payload.conversation_id);
+      const { type, conversation_id } = action.payload;
+      state.direct_chat.conversations.forEach((conversation) => {
+        if (conversation.id === conversation_id) {
+          if (type === "Message viewed") conversation.unread = 0;
+          if (type === "Notification of viewed messages") {
+            conversation.isSeen = true;
+          } else if (type === "Message sent") {
+            conversation.isSeen = false;
+          }
+        }
+      });
+    },
     sortConversation(state, action) {
       const { room_id, conversations } = action.payload;
       console.log(room_id, conversations);
@@ -180,11 +203,15 @@ export const FetchCurrentMessages = ({ messages }) => {
   };
 };
 
-export const AddDirectMessage = ({ message, data }) => {
+export const AddDirectMessage = ({ message, conversation_id }) => {
   return async (dispatch, getState) => {
-    if(data.conversation_id===getState().app.room_id)
-    dispatch(slice.actions.addDirectMessage({ message }));
-  else console.log("Bạn đang không trong phòng họp")
+    if (conversation_id === getState().app.room_id) {
+      socket.emit("message_seen", {
+        conversation_id,
+        from:  getState().conversation.direct_chat.current_conversation.user_id,
+      });
+      dispatch(slice.actions.addDirectMessage({ message }));
+    } else console.log("Bạn đang không trong phòng họp");
   };
 };
 export const UpdateUserStatus = (user) => {
@@ -192,9 +219,20 @@ export const UpdateUserStatus = (user) => {
     dispatch(slice.actions.updateUserStatus(user));
   };
 };
-export const SortConversation = (conversations, room_id) => {
+export const SortConversation = ({ room_id }) => {
   return async (dispatch, getState) => {
     console.log("đã sắp xếp");
-    dispatch(slice.actions.sortConversation(getState().conversation.direct_chat.conversations, room_id));
+    dispatch(
+      slice.actions.sortConversation({
+        conversations: getState().conversation.direct_chat.conversations,
+        room_id,
+      })
+    );
+  };
+};
+
+export const UpdateMessageStatus = ({ conversation_id, type }) => {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.updateMessageStatus({ conversation_id, type }));
   };
 };

@@ -26,11 +26,7 @@ import Picker from "@emoji-mart/react";
 import { socket } from "../../socket";
 import {  useDispatch, useSelector } from "react-redux";
 import {
-  UpdateDirectConversation,
-  AddDirectConversation,
-  AddDirectMessage,
-  UpdateUserStatus,
-  SortConversation
+  UpdateMessageStatus
 } from "../../redux/slices/conversation";
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -267,7 +263,7 @@ const Footer = () => {
                     type: containsUrl(value) ? "Link" : "Text",
                   });
                   console.log("đã phát đi tin nhắn")
-                //  dispatch(SortConversation({room_id,conversations}))
+                 dispatch(UpdateMessageStatus({conversation_id: room_id,type:"Message sent"}))
                   setValue("")
                 }}
               >

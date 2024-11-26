@@ -20,7 +20,11 @@ import { ToggleSidebar } from "../../redux/slices/app";
 import { useDispatch, useSelector } from "react-redux";
 import { StartAudioCall } from "../../redux/slices/audioCall";
 import { StartVideoCall } from "../../redux/slices/videoCall";
-
+const getFirstLetter = (str) => {
+  const words = str.trim().split(" ");
+  const new_words = words.map((word) => word[0].toUpperCase());
+  return new_words.join("");
+};
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
     backgroundColor: "#44b700",
@@ -125,16 +129,14 @@ const ChatHeader = () => {
                   }}
                   variant="dot"
                 >
-                  <Avatar
-                    alt={current_conversation?.name}
-                    src={current_conversation?.img}
-                  />
+                  <Avatar alt={current_conversation?.name} src={""}>
+                    {getFirstLetter(current_conversation?.name)}
+                  </Avatar>
                 </StyledBadge>
               ) : (
-                <Avatar
-                  alt={current_conversation?.name}
-                  src={current_conversation?.img}
-                />
+                <Avatar alt={current_conversation?.name} src={""}>
+                {getFirstLetter(current_conversation?.name)}
+              </Avatar>
               )}
             </Box>
             <Stack spacing={0.2}>

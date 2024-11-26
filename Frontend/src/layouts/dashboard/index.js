@@ -16,6 +16,7 @@ import {
   AddDirectMessage,
   UpdateUserStatus,
   SortConversation,
+  UpdateMessageStatus
 } from "../../redux/slices/conversation";
 import AudioCallNotification from "../../sections/dashboard/Audio/CallNotification";
 import VideoCallNotification from "../../sections/dashboard/video/CallNotification";
@@ -85,9 +86,13 @@ const DashboardLayout = () => {
         // TODO => dispatch an action to add this in call_queue
         dispatch(PushToVideoCallQueue(data));
       });
-
+      socket.on("seen_message_notification", (data) => {
+            console.log("thông báo về người nhận đã xem tin nhắn",data)
+        dispatch(UpdateMessageStatus({conversation_id:data.conversation_id,type:"Notification of viewed messages"}));
+      });
       socket.on("new_message", (data) => {
-        const message = data.message;
+        const {message,conversation_id} = data;
+
         console.log("nhận được tin nhắn");
         console.log(data);
 
@@ -95,7 +100,6 @@ const DashboardLayout = () => {
         dispatch(
           SortConversation({
             room_id: data.conversation_id,
-            conversations,
           })
         );
         dispatch(
@@ -115,7 +119,7 @@ const DashboardLayout = () => {
               incoming: message.to === user_id,
               outgoing: message.from === user_id,
             },
-            data,
+            conversation_id,
           })
         );
       });
@@ -167,13 +171,13 @@ const DashboardLayout = () => {
       socket?.off("start_chat");
       socket?.off("new_message");
       socket?.off("audio_call_notification");
+      socket?.off("video_call_notification");
     };
   }, [isLoggedIn, socket]);
 
   if (!isLoggedIn) {
     return <Navigate to={"/auth/login"} />;
   }
-
   return (
     <>
       <Stack direction="row">
