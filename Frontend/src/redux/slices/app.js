@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "../../utils/axios";
 // import S3 from "../../utils/s3";
-import {v4} from 'uuid';
+import { v4 } from "uuid";
 import S3 from "../../utils/s3";
 import { S3_BUCKET_NAME } from "../../config";
 // ----------------------------------------------------------------------
@@ -24,8 +24,9 @@ const initialState = {
   friendRequests: [], // all friend requests
   chat_type: null,
   room_id: null,
+  group_id: null,
   call_logs: [],
-  name_avatar:""
+  outgoingInvitations: [],
 };
 
 const slice = createSlice({
@@ -75,9 +76,23 @@ const slice = createSlice({
     updateFriendRequests(state, action) {
       state.friendRequests = action.payload.requests;
     },
+    updateFriendInvitations(state, action) {
+      state.outgoingInvitations = action.payload.requests;
+    },
     selectConversation(state, action) {
       state.chat_type = "individual";
       state.room_id = action.payload.room_id;
+    },
+    selectGroup(state, action) {
+      state.chat_type = "group";
+      state.group_id = action.payload.group_id;
+    },
+    updateOutgoingInvitaion(state, action) {
+      const {type,invitation}=action.payload
+      if(type=='add')
+      state.outgoingInvitations.push(action.payload.invitation)
+      else if(type=='remove')
+        state.outgoingInvitations=state.outgoingInvitations.filter(inv=>inv!==invitation)
     },
   },
 });
@@ -123,9 +138,9 @@ export function UpdateTab(tab) {
 }
 
 export function FetchUsers() {
-  console.log("vai")
+  console.log("vai");
   return async (dispatch, getState) => {
-    console.log("token là :",getState().auth.token)
+    console.log("token là :", getState().auth.token);
     await axios
       .get(
         "/user/get-users",
@@ -138,7 +153,7 @@ export function FetchUsers() {
         }
       )
       .then((response) => {
-        console.log("Thông tin user là :",response.data);
+        console.log("Thông tin user là :", response.data);
         dispatch(slice.actions.updateUsers({ users: response.data.data }));
       })
       .catch((err) => {
@@ -214,13 +229,45 @@ export function FetchFriendRequests() {
       });
   };
 }
+export function FetchFriendInvitations() {
+  return async (dispatch, getState) => {
+    await axios
+      .get(
+        "/user/get-invitation",
 
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getState().auth.token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        const invitations =response.data.data
+        const friend_invitation=invitations.map((inv)=>{
+            return inv.recipient
+        })
+        dispatch(
+          slice.actions.updateFriendInvitations({ requests:friend_invitation })
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+}
 export const SelectConversation = ({ room_id }) => {
   return async (dispatch, getState) => {
     dispatch(slice.actions.selectConversation({ room_id }));
   };
 };
-
+export const SelectGroup = ({ group_id }) => {
+  return async (dispatch, getState) => {
+    console.log(`Select Group ${group_id}`);
+    dispatch(slice.actions.selectGroup({ group_id }));
+  };
+};
 export const FetchCallLogs = () => {
   return async (dispatch, getState) => {
     axios
@@ -232,7 +279,9 @@ export const FetchCallLogs = () => {
       })
       .then((response) => {
         console.log(response);
-        dispatch(slice.actions.fetchCallLogs({ call_logs: response.data.data }));
+        dispatch(
+          slice.actions.fetchCallLogs({ call_logs: response.data.data })
+        );
       })
       .catch((err) => {
         console.log(err);
@@ -263,28 +312,11 @@ export const UpdateUserProfile = (formValues) => {
 
     const key = v4();
 
-    try{
-      // S3.getSignedUrl(
-      //   "putObject",
-      //   { Bucket: S3_BUCKET_NAME, Key: key, ContentType: `image/${file.type}` },
-      //   async (_err, presignedURL) => {
-      //     await fetch(presignedURL, {
-      //       method: "PUT",
-  
-      //       body: file,
-  
-      //       headers: {
-      //         "Content-Type": file.type,
-      //       },
-      //     });
-      //   }
-      // );
-    }
-    catch(error) {
+    try {
+
+    } catch (error) {
       console.log(error);
     }
-
-    
 
     axios
       .patch(
@@ -306,3 +338,9 @@ export const UpdateUserProfile = (formValues) => {
       });
   };
 };
+export const UpdateOutgoingInvitaion = ({ invitation,type}) => {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.updateOutgoingInvitaion({invitation,type}));
+  };
+};
+

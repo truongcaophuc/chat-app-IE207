@@ -58,13 +58,10 @@ const MessageOption = () => {
 const TextMsg = ({ el, menu }) => {
   const theme = useTheme();
   const { current_conversation, conversations } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
-  const { chat_type } = useSelector(
-    (state) => state.app
+    (state) => state.conversation.group_chat
   );
   const { current_messages } = useSelector(
-    (state) => state.conversation.direct_chat
+    (state) => state.conversation.group_chat
   );
   const index_message = current_messages.indexOf(el);
   const prev_message = current_messages[index_message - 1];
@@ -86,7 +83,7 @@ const TextMsg = ({ el, menu }) => {
           src={``}
           round
           size="30"
-          name={current_conversation.name}
+          name={el.from}
           style={{position:"absolute",left:"0px"}}
         />
       )}

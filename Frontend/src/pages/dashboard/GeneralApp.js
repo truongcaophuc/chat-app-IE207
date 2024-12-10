@@ -39,7 +39,7 @@ const GeneralApp = () => {
                 : "6px solid #0162C4",
           }}
         >
-          {chat_type === "individual" &&
+          {
           room_id !== null ? (
             <ChatComponent />
           ) : (
@@ -51,8 +51,8 @@ const GeneralApp = () => {
             >
               <NoChat />
               <Typography variant="subtitle2">
-                Select a conversation or start a{" "}
-                <Link
+                Chọn một cuộc trò chuyện để bắt đầu{" "}
+                {/* <Link
                   style={{
                     color: theme.palette.primary.main,
                     textDecoration: "none",
@@ -60,7 +60,7 @@ const GeneralApp = () => {
                   to="/"
                 >
                   new one
-                </Link>
+                </Link> */}
               </Typography>
             </Stack>
           )}

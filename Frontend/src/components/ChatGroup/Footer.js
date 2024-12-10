@@ -27,9 +27,9 @@ import { socket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
 import {
   UpdateMessageStatus,
-  AddDirectMessage,
-  SortConversation,
-  UpdateDirectConversation
+  AddGroupMessage,
+  SortConversationGroup,
+  UpdateGroupConversation
 } from "../../redux/slices/conversation";
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -172,7 +172,7 @@ const Footer = () => {
 
   const isMobile = useResponsive("between", "md", "xs", "sm");
 
-  const { sideBar, room_id } = useSelector((state) => state.app);
+  const { sideBar, group_id } = useSelector((state) => state.app);
 
   const [openPicker, setOpenPicker] = React.useState(false);
 
@@ -259,42 +259,41 @@ const Footer = () => {
               <IconButton
                 onClick={() => {
                   {
-                    {
-                      if (value)
-                        socket.emit("text_message", {
-                          message: linkify(value),
-                          conversation_id: room_id,
-                          from: user_id,
-                          to: current_conversation.user_id,
-                          type: containsUrl(value) ? "Link" : "Text",
-                        });
+                    if (value) {
+                      socket.emit("new_message_group", {
+                        message: linkify(value),
+                        conversation_id: group_id,
+                        from: user_id,
+                        type: containsUrl(value) ? "Link" : "Text",
+                      });
+
                       dispatch(
-                        AddDirectMessage({
+                        AddGroupMessage({
                           message: {
                             type: "msg",
                             subtype: "Text",
-                            message: linkify(value),
+                            message: value,
                             incoming: false,
                             outgoing: true,
                           },
-                          conversation_id:room_id,
-                        })
-                      );
-                      dispatch(
-                        SortConversation({
-                          room_id
-                        })
-                      );
-                      dispatch(
-                        UpdateDirectConversation({
-                          conversation: room_id,
-                          msg: {text:value},
+                          conversation_id:group_id,
                         })
                       );
                       console.log("đã phát đi tin nhắn");
                       dispatch(
+                        SortConversationGroup({
+                          room_id: group_id,
+                        })
+                      );
+                      dispatch(
+                        UpdateGroupConversation({
+                          conversation: group_id,
+                          msg: {text:value},
+                        })
+                      );
+                      dispatch(
                         UpdateMessageStatus({
-                          conversation_id: room_id,
+                          conversation_id: group_id,
                           type: "Message sent",
                         })
                       );

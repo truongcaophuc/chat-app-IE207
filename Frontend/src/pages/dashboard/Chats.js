@@ -138,11 +138,13 @@ const Chats = () => {
                   Tất cả
                 </Typography>
                 {/* Chat List */}
+                <Stack spacing={1}>
                 {filter_conversation
                   ?.filter((el) => !el.pinned)
                   .map((el, idx) => {
                     return <ChatElement {...el} key={idx} />;
                   })}
+                </Stack>
               </Stack>
             </SimpleBarStyle>
           </Stack>

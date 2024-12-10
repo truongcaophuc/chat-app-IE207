@@ -87,7 +87,14 @@ exports.getRequests = catchAsync(async (req, res, next) => {
     message: "Requests found successfully!",
   });
 });
-
+exports.getInvitation = catchAsync(async (req, res, next) => {
+  const requests = await FriendRequest.find({ sender: req.user._id })
+  res.status(200).json({
+    status: "success",
+    data: requests,
+    message: "Requests found successfully!",
+  });
+});
 exports.getFriends = catchAsync(async (req, res, next) => {
   const this_user = await User.findById(req.user._id).populate(
     "friends",
@@ -107,10 +114,6 @@ exports.getFriends = catchAsync(async (req, res, next) => {
 exports.generateZegoToken = catchAsync(async (req, res, next) => {
   try {
     const { userId, room_id } = req.body;
-
-    console.log("app id là :",appID)
-    console.log(room_id, "from generate zego token");
-
     const effectiveTimeInSeconds = 3600; //type: number; unit: s; token expiration time, unit: second
     const payloadObject = {
       room_id, // Please modify to the user's roomID
@@ -131,17 +134,13 @@ exports.generateZegoToken = catchAsync(async (req, res, next) => {
       effectiveTimeInSeconds,
       payload
     );
-    console.log("token là :",token)
-    console.log("appid là :",appID*1)
-    console.log("servert là :",serverSecret)
-    console.log("userid là :",userId)
     res.status(200).json({
       status: "success",
       message: "Token generated successfully",
       token,
     });
   } catch (err) {
-    console.log("CÓ lỗi",err);
+    console.log("Có lỗi",err);
   }
 });
 
@@ -211,7 +210,7 @@ exports.getCallLogs = catchAsync(async (req, res, next) => {
     participants: { $all: [user_id] },
   }).populate("from to");
 
-  console.log(audio_calls, video_calls);
+  //console.log(audio_calls, video_calls);
 
   for (let elm of audio_calls) {
     const missed = elm.verdict !== "Accepted";

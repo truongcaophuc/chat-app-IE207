@@ -1,10 +1,10 @@
 import React from "react";
-import { Box, Badge, Stack, Typography } from "@mui/material";
+import { Box, Badge, Stack, Typography,Avatar as AvatarMUI } from "@mui/material";
 import { styled, useTheme, alpha } from "@mui/material/styles";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { SelectConversation,SelectGroup } from "../redux/slices/app";
-import { UpdateMessageStatus } from "../redux/slices/conversation";
+import { SelectGroup } from "../redux/slices/app";
+import { UpdateMessageStatus,UpdateMessageGroupStatus } from "../redux/slices/conversation";
 import { socket } from "../socket";
 import Avatar from 'react-avatar';
 const truncateText = (string, n) => {
@@ -46,13 +46,13 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
+const ChatGroupElement = ({ img, name, msg, time, unread, online, id }) => {
   const dispatch = useDispatch();
-  const { room_id } = useSelector((state) => state.app);
+  const { group_id } = useSelector((state) => state.app);
   const { conversations } = useSelector(
-    (state) => state.conversation.direct_chat
+    (state) => state.conversation.group_chat
   );
-  const selectedChatId = room_id?.toString();
+  const selectedChatId = group_id?.toString();
   const conversation = conversations.find(
     (conversation) => conversation.id === id
   );
@@ -63,22 +63,24 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   }
 
   const theme = useTheme();
-
+  const maxDisplay = 4; // Số lượng avatar tối đa hiển thị
+  const displayMembers = conversation?.users?.slice(0, maxDisplay);
+  const extraCount = conversation?.users?.length - (maxDisplay - 1);
   return (
     <StyledChatBox
       onClick={() => {
         console.log("đã chọn");
         console.log(id);
-        dispatch(SelectConversation({ room_id: id }));
+        dispatch(SelectGroup({ group_id: id }));
         if (conversation.unread != 0) {
           console.log("Ta đã phát sự kiện")
           dispatch(
-            UpdateMessageStatus({ conversation_id: id, type: "Message viewed" })
+            UpdateMessageGroupStatus({ conversation_id: id, type: "Message viewed" })
           );
-          socket.emit("message_seen", {
-            conversation_id: id,
-            from: conversation.user_id,
-          });
+          // socket.emit("message_group_seen", {
+          //   conversation_id: id,
+          //   from: conversation.user_id,
+          // });
         }
       }}
       sx={{
@@ -102,18 +104,41 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
         justifyContent="space-between"
       >
         <Stack direction="row" spacing={2}>
-          {" "}
-          {online ? (
-            <StyledBadge
-              overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              variant="dot"
-            >
-              <Avatar alt={name} src={""} name={name} size={40} round={true}/>
-            </StyledBadge>
-          ) : (
-            <Avatar alt={name} src={""} name={name} size={40} round={true}/>
-          )}
+        <Box sx={{ position: "relative", width: 45, height: 45 }}>
+              {displayMembers?.map((member, index) => (
+                <Avatar
+                  key={index}
+                  src={member.avatarUrl}
+                  round
+                  size="25"
+                  style={{
+                    position: "absolute",
+                    ...(index === 0 && { top: 0, left: 0 }),
+                    ...(index === 1 && { top: 0, right: 0 }),
+                    ...(index === 2 && {
+                      bottom: 0,
+                      left: displayMembers.length === 3 ? 10 : 0,
+                    }),
+                    ...(index === 3 && { bottom: 0, right: 0 }),
+                  }}
+                  name={member.firstName + " " + member.lastName}
+                />
+              ))}
+              {extraCount > 1 && (
+                <AvatarMUI
+                  sx={{
+                    width: 25, // Kích thước chiều rộng
+                    height: 25, // Kích thước chiều cao
+                    fontSize: 14,
+                    bottom: 0,
+                    right: 0,
+                    position: "absolute",
+                  }}
+                >
+                  +{extraCount}
+                </AvatarMUI>
+              )}
+            </Box>
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
             <Typography
@@ -147,4 +172,4 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   );
 };
 
-export default ChatElement;
+export default ChatGroupElement;

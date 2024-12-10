@@ -5,6 +5,7 @@ import {
   FetchFriendRequests,
   FetchFriends,
   FetchUsers,
+  FetchFriendInvitations
 } from "../../redux/slices/app";
 import { FriendElement, FriendRequestElement, UserElement } from "../../components/UserElement";
 
@@ -16,7 +17,6 @@ const UsersList = () => {
   const dispatch = useDispatch();
 
   const { users } = useSelector((state) => state.app);
-  console.log("đã phát fetch user")
   useEffect(() => {
     dispatch(FetchUsers());
     console.log("đã phát fetch user rôi")
@@ -31,7 +31,7 @@ const UsersList = () => {
   );
 };
 
-const FriendsList = () => {
+const FriendsList = ({handleClose}) => {
   const dispatch = useDispatch();
 
   const { friends } = useSelector((state) => state.app);
@@ -43,7 +43,7 @@ const FriendsList = () => {
   return (
     <>
       {friends.map((el, idx) => {
-        return <FriendElement key={idx} {...el} />;
+        return <FriendElement key={idx} {...el} handleClose={handleClose}/>;
       })}
     </>
   );
@@ -51,7 +51,7 @@ const FriendsList = () => {
 
 const RequestsList = () => {
   const dispatch = useDispatch();
-
+  console.log('chuyển tab')
   const { friendRequests } = useSelector((state) => state.app);
 
   useEffect(() => {
@@ -69,10 +69,14 @@ const RequestsList = () => {
 
 const Friends = ({ open, handleClose }) => {
   const [value, setValue] = React.useState(0);
-
+  const dispatch = useDispatch();
+  console.log(handleClose)
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  useEffect(() => {
+    dispatch(FetchFriendInvitations());
+  }, []);
 
   return (
     <Dialog
@@ -88,9 +92,9 @@ const Friends = ({ open, handleClose }) => {
       {/* <DialogTitle>{"Friends"}</DialogTitle> */}
       <Stack p={2} sx={{ width: "100%" }}>
         <Tabs value={value} onChange={handleChange} centered>
-          <Tab label="Explore" />
-          <Tab label="Friends" />
-          <Tab label="Requests" />
+          <Tab label="Khám phá" />
+          <Tab label="Bạn bè" />
+          <Tab label="Lời mời kết bạn" />
         </Tabs>
       </Stack>
       <DialogContent>
@@ -102,7 +106,7 @@ const Friends = ({ open, handleClose }) => {
                   return <UsersList />;
 
                 case 1: // display friends in this list
-                  return <FriendsList />;
+                  return <FriendsList handleClose={handleClose}/>;
 
                 case 2: // display request in this list
                   return <RequestsList />;

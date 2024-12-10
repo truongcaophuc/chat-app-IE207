@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import * as Yup from "yup";
 import {
   Button,
@@ -8,34 +8,32 @@ import {
   Slide,
   Stack,
 } from "@mui/material";
-
+import { FetchAllUsers } from "../../redux/slices/app";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import FormProvider from "../../components/hook-form/FormProvider";
 import { RHFTextField } from "../../components/hook-form";
 import RHFAutocomplete from "../../components/hook-form/RHFAutocomplete";
-
+import { useDispatch, useSelector } from "react-redux";
+import { socket } from "../../socket";
+import { AddGroupConversation } from "../../redux/slices/conversation";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const TAGS_OPTION = [
-  "Toy Story 3",
-  "Logan",
-  "Full Metal Jacket",
-  "Dangal",
-  "The Sting",
-  "2001: A Space Odyssey",
-  "Singin' in the Rain",
-  "Toy Story",
-  "Bicycle Thieves",
-  "The Kid",
-  "Inglourious Basterds",
-  "Snatch",
-  "3 Idiots",
-];
-
 const CreateGroupForm = ({ handleClose }) => {
+  const dispatch = useDispatch();
+  const { all_users } = useSelector((state) => state.app);
+  const format_users = all_users.map((user) => {
+    return { id: user._id, name: user.firstName + " " + user.lastName };
+  });
+  useEffect(() => {
+    console.log("lay du lieu user");
+    dispatch(FetchAllUsers());
+  }, []);
+  const { _id, firstName,lastName } = useSelector(
+    (state) => state.app.user
+  );
   const NewGroupSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
 
@@ -65,6 +63,11 @@ const CreateGroupForm = ({ handleClose }) => {
     try {
       //  API Call
       console.log("DATA", data);
+      data.members.push({id:_id,name:`${firstName} ${lastName}`});
+      socket.emit("new_group", data, (group) => {
+        dispatch(AddGroupConversation({group}));
+      });
+      handleClose();
     } catch (error) {
       console.error(error);
     }
@@ -73,13 +76,13 @@ const CreateGroupForm = ({ handleClose }) => {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        <RHFTextField name="title" label="Title" />
+        <RHFTextField name="title" label="Tên" />
         <RHFAutocomplete
           name="members"
-          label="Members"
+          label="Thành viên"
           multiple
           freeSolo
-          options={TAGS_OPTION.map((option) => option)}
+          options={format_users}
           ChipProps={{ size: "medium" }}
         />
         <Stack
@@ -88,9 +91,9 @@ const CreateGroupForm = ({ handleClose }) => {
           alignItems="center"
           justifyContent={"end"}
         >
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleClose}>Hủy</Button>
           <Button type="submit" variant="contained">
-            Create
+            Tạo
           </Button>
         </Stack>
       </Stack>
@@ -110,7 +113,7 @@ const CreateGroup = ({ open, handleClose }) => {
       aria-describedby="alert-dialog-slide-description"
       sx={{ p: 4 }}
     >
-      <DialogTitle>{"Create New Group"}</DialogTitle>
+      <DialogTitle>{"Tạo nhóm mới"}</DialogTitle>
 
       <DialogContent sx={{ mt: 4 }}>
         {/* Create Group Form */}

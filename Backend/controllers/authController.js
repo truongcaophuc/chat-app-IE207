@@ -79,7 +79,7 @@ exports.sendOTP = catchAsync(async (req, res, next) => {
 
   await user.save({ new: true, validateModifiedOnly: true });
 
-  console.log(new_otp);
+ // console.log(new_otp);
 
   // TODO send mail
   mailService.sendEmail({
@@ -208,7 +208,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 2) Verification of token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  console.log(decoded);
+ console.log(decoded);
 
   // 3) Check if user still exists
 
@@ -234,10 +234,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
  
   try {
     const resetURL = `http://localhost:3000/auth/new-password`;
-
-
-    console.log(resetURL);
-
     mailService.sendEmail();
 
     res.status(200).json({

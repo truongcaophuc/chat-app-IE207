@@ -10,6 +10,7 @@ import {
   Stack,
   styled,
   Typography,
+  Avatar as AvatarMUI,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
@@ -71,14 +72,12 @@ const ChatHeader = () => {
   const theme = useTheme();
 
   const { current_conversation } = useSelector(
-    (state) => state.conversation.direct_chat
+    (state) => state.conversation.group_chat
   );
-  const { conversations } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
-  const statusUser = conversations.find(
-    (conversation) => conversation.id === current_conversation?.id
-  )?.online;
+  console.log("current", current_conversation);
+  // const { conversations } = useSelector(
+  //   (state) => state.conversation.group_chat
+  // );
   const [conversationMenuAnchorEl, setConversationMenuAnchorEl] =
     React.useState(null);
   const openConversationMenu = Boolean(conversationMenuAnchorEl);
@@ -88,7 +87,9 @@ const ChatHeader = () => {
   const handleCloseConversationMenu = () => {
     setConversationMenuAnchorEl(null);
   };
-
+  const maxDisplay = 4; // Số lượng avatar tối đa hiển thị
+  const displayMembers = current_conversation?.users?.slice(0, maxDisplay);
+  const extraCount = current_conversation?.users?.length - (maxDisplay - 1);
   return (
     <>
       <Box
@@ -115,32 +116,39 @@ const ChatHeader = () => {
             spacing={2}
             direction="row"
           >
-            <Box>
-              {statusUser ? (
-                <StyledBadge
-                  overlap="circular"
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  variant="dot"
-                >
-                  <Avatar
-                    alt={current_conversation?.name}
-                    src={""}
-                    name={current_conversation?.name}
-                    size={40}
-                    round={true}
-                  />
-                </StyledBadge>
-              ) : (
+            <Box sx={{ position: "relative", width: 45, height: 45 }}>
+              {displayMembers?.map((member, index) => (
                 <Avatar
-                  alt={current_conversation?.name}
-                  src={""}
-                  name={current_conversation?.name}
-                  size={40}
-                  round={true}
+                  key={index}
+                  src={member.avatarUrl}
+                  round
+                  size="25"
+                  style={{
+                    position: "absolute",
+                    ...(index === 0 && { top: 0, left: 0 }),
+                    ...(index === 1 && { top: 0, right: 0 }),
+                    ...(index === 2 && {
+                      bottom: 0,
+                      left: displayMembers.length === 3 ? 10 : 0,
+                    }),
+                    ...(index === 3 && { bottom: 0, right: 0 }),
+                  }}
+                  name={member.firstName + " " + member.lastName}
                 />
+              ))}
+              {extraCount > 1 && (
+                <AvatarMUI
+                  sx={{
+                    width: 25, // Kích thước chiều rộng
+                    height: 25, // Kích thước chiều cao
+                    fontSize: 14,
+                    bottom: 0,
+                    right: 0,
+                    position: "absolute",
+                  }}
+                >
+                  +{extraCount}
+                </AvatarMUI>
               )}
             </Box>
             <Stack spacing={0.2}>
@@ -148,7 +156,7 @@ const ChatHeader = () => {
                 {current_conversation?.name}
               </Typography>
               <Typography variant="caption">
-                {statusUser ? "Online" : "Offline"}
+                {current_conversation?.users?.length + " thành viên"}
               </Typography>
             </Stack>
           </Stack>

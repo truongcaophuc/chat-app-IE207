@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Box, Fade, Menu, MenuItem, Stack } from "@mui/material";
+import { Box, Fade, Menu, MenuItem, Stack } from "@mui/material";
 
 import { faker } from "@faker-js/faker";
 
@@ -8,12 +8,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { LogoutUser } from "../../redux/slices/auth";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
-import { AWS_S3_REGION, S3_BUCKET_NAME } from "../../config";
-const getFirstLetter=(str)=>{
-  const words=str.trim().split(" ")
-  const new_words=words.map((word)=>word[0].toUpperCase())
-  return new_words.join("")
-}
+import Avatar from 'react-avatar';
+
 const ProfileMenu = () => {
   const {user} = useSelector((state) => state.app);
   const navigate = useNavigate();
@@ -36,15 +32,14 @@ const ProfileMenu = () => {
     <>
       <Avatar
         id="profile-positioned-button"
-        aria-controls={openMenu ? "profile-positioned-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={openMenu ? "true" : undefined}
         alt={user_name}
         src={""}
         onClick={handleClick}
-      >
-        {getFirstLetter(user_name)}
-        </Avatar>
+        name={user_name}
+        round={true}
+        size={40}
+        //color={"#3988ff"}
+      />
       <Menu
         MenuListProps={{
           "aria-labelledby": "fade-button",

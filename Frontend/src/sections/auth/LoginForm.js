@@ -29,7 +29,7 @@ export default function AuthLoginForm() {
   });
 
   const defaultValues = {
-    email: "demo@tawk.com",
+    email: "demo@gmail.com",
     password: "demo1234",
   };
 
@@ -67,11 +67,11 @@ export default function AuthLoginForm() {
           <Alert severity="error">{errors.afterSubmit.message}</Alert>
         )}
 
-        <RHFTextField name="email" label="Email address" />
+        <RHFTextField name="email" label="Email" />
 
         <RHFTextField
           name="password"
-          label="Password"
+          label="Mật khẩu"
           type={showPassword ? "text" : "password"}
           InputProps={{
             endAdornment: (
@@ -90,7 +90,7 @@ export default function AuthLoginForm() {
 
       <Stack alignItems="flex-end" sx={{ my: 2 }}>
         <Link component={RouterLink} to="/auth/reset-password" variant="body2" color="inherit" underline="always">
-          Forgot password?
+          Quên mật khẩu?
         </Link>
       </Stack>
 
@@ -112,7 +112,7 @@ export default function AuthLoginForm() {
           },
         }}
       >
-        Login
+        Đăng nhập
       </LoadingButton>
     </FormProvider>
   );

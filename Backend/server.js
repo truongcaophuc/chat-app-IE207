@@ -19,6 +19,7 @@ const { promisify } = require("util");
 const User = require("./models/user");
 const FriendRequest = require("./models/friendRequest");
 const OneToOneMessage = require("./models/OneToOneMessage");
+const GroupConversation = require("./models/GroupConversation");
 const AudioCall = require("./models/audioCall");
 const VideoCall = require("./models/videoCall");
 
@@ -56,12 +57,19 @@ io.on("connection", async (socket) => {
   // console.log("user_id là", user_id);
   if (user_id != null && Boolean(user_id)) {
     try {
-     await User.findByIdAndUpdate(user_id, {
+      await User.findByIdAndUpdate(user_id, {
         socket_id: socket.id,
         status: "Online",
       });
-      console.log("đã cập nhật trạng thái thành công")
-      io.emit("user_status_update", { _id:user_id, status:"Online"})
+      const groups_id = await GroupConversation.find({
+        participants: { $all: [user_id] },
+      }).select("_id");
+      groups_id.forEach((group_id) => {
+        socket.join(group_id._id.toString());
+        console.log(`${socket.id} joined room: ${group_id}`);
+      });
+      console.log("đã cập nhật trạng thái thành công");
+      io.emit("user_status_update", { _id: user_id, status: "Online" });
     } catch (e) {
       console.log(e);
     }
@@ -91,16 +99,17 @@ io.on("connection", async (socket) => {
 
   socket.on("accept_request", async (data) => {
     // accept friend request => add ref of each other in friends array
-    console.log(data);
+    //console.log(data);
     const request_doc = await FriendRequest.findById(data.request_id);
 
-    console.log(request_doc);
+    // console.log(request_doc);
 
     const sender = await User.findById(request_doc.sender);
     const receiver = await User.findById(request_doc.recipient);
-
-    sender.friends.push(request_doc.recipient);
-    receiver.friends.push(request_doc.sender);
+    if (!sender.friends.includes(request_doc.recipient))
+      sender.friends.push(request_doc.recipient);
+    if (!receiver.friends.includes(request_doc.sender))
+      receiver.friends.push(request_doc.sender);
 
     await receiver.save({ new: true, validateModifiedOnly: true });
     await sender.save({ new: true, validateModifiedOnly: true });
@@ -113,9 +122,11 @@ io.on("connection", async (socket) => {
     // emit event request accepted to both
     io.to(sender?.socket_id).emit("request_accepted", {
       message: "Friend Request Accepted",
+      id: request_doc.recipient,
     });
     io.to(receiver?.socket_id).emit("request_accepted", {
       message: "Friend Request Accepted",
+      id: request_doc.recipient,
     });
   });
 
@@ -124,7 +135,15 @@ io.on("connection", async (socket) => {
       participants: { $all: [user_id] },
     }).populate("participants", "firstName lastName avatar _id email status");
 
-   
+    // console.log("Các cuộc họp hiện tại là: ",existing_conversations);
+
+    callback(existing_conversations);
+  });
+
+  socket.on("get_group_conversations", async ({ user_id }, callback) => {
+    const existing_conversations = await GroupConversation.find({
+      participants: { $all: [user_id] },
+    }).populate("participants", "firstName lastName avatar _id email status");
 
     // console.log("Các cuộc họp hiện tại là: ",existing_conversations);
 
@@ -133,16 +152,15 @@ io.on("connection", async (socket) => {
 
   socket.on("start_conversation", async (data) => {
     // data: {to: from:}
-
     const { to, from } = data;
 
     // check if there is any existing conversation
 
     const existing_conversations = await OneToOneMessage.find({
-      participants: { $size: 2, $all: [to, from] },
+      participants: { $all: [to, from] },
     }).populate("participants", "firstName lastName _id email status");
 
-   // console.log(existing_conversations[0], "Existing Conversation");
+    // console.log(existing_conversations[0], "Existing Conversation");
 
     // if no => create a new OneToOneMessage doc & emit event "start_chat" & send conversation details as payload
     if (existing_conversations.length === 0) {
@@ -150,12 +168,10 @@ io.on("connection", async (socket) => {
         participants: [to, from],
       });
 
-      new_chat = await OneToOneMessage.findById(new_chat).populate(
+      new_chat = await OneToOneMessage.findById(new_chat._id).populate(
         "participants",
         "firstName lastName _id email status"
       );
-
-      //console.log(new_chat);
 
       socket.emit("start_chat", new_chat);
     }
@@ -164,14 +180,81 @@ io.on("connection", async (socket) => {
       socket.emit("start_chat", existing_conversations[0]);
     }
   });
+  socket.on("new_group", async (data, callback) => {
+    // data: {to: from:}
+    const { title, members } = data;
+    const users_id = members.map((member) => member.id);
+    // check if there is any existing conversation
 
+    const new_group = await GroupConversation.create({
+      participants: users_id,
+      title,
+    });
+    const result = await GroupConversation.findById(new_group._id).populate(
+      "participants",
+      "firstName lastName _id"
+    );
+    callback(result);
+    // console.log(existing_conversations[0], "Existing Conversation");
+
+    // if no => create a new OneToOneMessage doc & emit event "start_chat" & send conversation details as payload
+
+    // if yes => just emit event "start_chat" & send conversation details as payload
+  });
   socket.on("get_messages", async (data, callback) => {
     try {
-      console.log("Có yêu cầu lấy dữ liệu")
       const { messages } = await OneToOneMessage.findById(
         data.conversation_id
       ).select("messages");
+
       callback(messages);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  socket.on("get_messages_group", async (data, callback) => {
+    try {
+      const { messages } = await GroupConversation.findById(
+        data.conversation_id
+      )
+        .select("messages")
+        .populate({
+          path: "messages.from", // Đường dẫn đến trường cần populate
+          select: "_id firstName lastName", // Chọn các trường cụ thể từ User (ví dụ: name và email)
+        });
+      callback(messages);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  socket.on("new_message_group", async (data, callback) => {
+    try {
+      const { message, conversation_id, from, type } = data;
+      console.log('All rooms:', (socket.rooms));
+      // message => {to, from, type, created_at, text, file}
+
+      const new_message = {
+        from: from,
+        type: type,
+        created_at: Date.now(),
+        text: message,
+      };
+
+      // fetch OneToOneMessage Doc & push a new message to existing conversation
+      const chat = await GroupConversation.findById(conversation_id);
+      chat.messages.push(new_message);
+      // save to db`
+      console.log(
+        "conversation id",conversation_id
+      )
+      const from_user = await User.find({_id:from})
+      await chat.save({ new: true, validateModifiedOnly: true });
+      socket.to(conversation_id).emit("new_message_group", {
+        conversation_id,
+        message: new_message,
+        from:from_user.firstName+" "+from_user.lastName
+      });
+      // emit incoming_message -> to user
     } catch (error) {
       console.log(error);
     }
@@ -184,23 +267,36 @@ io.on("connection", async (socket) => {
         { arrayFilters: [{ "msg.is_read": false }] } // Lọc các phần tử trong mảng
       );
       const from_user = await User.findById(data.from);
-      socket.to(from_user?.socket_id).emit("seen_message_notification",{...data})
+      socket
+        .to(from_user?.socket_id)
+        .emit("seen_message_notification", { ...data });
     } catch (error) {
       console.log(error);
     }
   });
-
+  socket.on("message_group_seen", async (data, callback) => {
+    try {
+      await GroupConversation.updateMany(
+        { _id: data.conversation_id }, // Điều kiện lọc
+        { $set: { "messages.$[msg].is_read": true } }, // Cập nhật với identifier
+        { arrayFilters: [{ "msg.is_read": false }] } // Lọc các phần tử trong mảng
+      );
+      socket
+        .to(data.conversation_id)
+        .emit("seen_message_group_notification", { ...data });
+    } catch (error) {
+      console.log(error);
+    }
+  });
   // Handle incoming text/link messages
   socket.on("text_message", async (data) => {
-    console.log("Received message:", data);
-
     // data: {to, from, text}
 
     const { message, conversation_id, from, to, type } = data;
 
     const to_user = await User.findById(to);
     const from_user = await User.findById(from);
-    console.log("to_user là:", to_user)
+
     // message => {to, from, type, created_at, text, file}
 
     const new_message = {
@@ -219,16 +315,16 @@ io.on("connection", async (socket) => {
 
     // emit incoming_message -> to user
 
-    io.to(to_user?.socket_id).emit("new_message", {
+    socket.to(to_user?.socket_id).emit("new_message", {
       conversation_id,
       message: new_message,
     });
 
     // emit outgoing_message -> from user
-    io.to(from_user?.socket_id).emit("new_message", {
-      conversation_id,
-      message: new_message,
-    });
+    // io.to(from_user?.socket_id).emit("new_message", {
+    //   conversation_id,
+    //   message: new_message,
+    // });
   });
 
   // handle Media/Document Message
@@ -265,7 +361,7 @@ io.on("connection", async (socket) => {
     const to_user = await User.findById(to);
     const from_user = await User.findById(from);
 
-    console.log("to_user", to_user);
+    //console.log("to_user", to_user);
 
     // send notification to receiver of call
     io.to(to_user?.socket_id).emit("audio_call_notification", {
@@ -279,7 +375,7 @@ io.on("connection", async (socket) => {
 
   // handle audio_call_not_picked
   socket.on("audio_call_not_picked", async (data) => {
-    console.log(data);
+    //console.log(data);
     // find and update call record
     const { to, from } = data;
 
@@ -365,13 +461,13 @@ io.on("connection", async (socket) => {
   // handle start_video_call event
   socket.on("start_video_call", async (data) => {
     const { from, to, roomID } = data;
-    console.log("yêu cầu gọi video")
-    console.log(data);
+    // console.log("yêu cầu gọi video");
+    // console.log(data);
 
     const to_user = await User.findById(to);
     const from_user = await User.findById(from);
 
-    console.log("to_user", to_user);
+    // console.log("to_user", to_user);
 
     // send notification to receiver of call
     io.to(to_user?.socket_id).emit("video_call_notification", {
@@ -385,7 +481,7 @@ io.on("connection", async (socket) => {
 
   // handle video_call_not_picked
   socket.on("video_call_not_picked", async (data) => {
-    console.log(data);
+    //  console.log(data);
     // find and update call record
     const { to, from } = data;
 
@@ -473,9 +569,10 @@ io.on("connection", async (socket) => {
 
     if (user_id) {
       await User.findByIdAndUpdate(user_id, { status: "Offline" });
-      io.emit("user_status_update", { _id:user_id, status: "Offline" });
+      io.emit("user_status_update", { _id: user_id, status: "Offline" });
+    } else {
+      console.log("User not found");
     }
-    else{console.log("User not found")}
     // broadcast to all conversation rooms of this user that this user is offline (disconnected)
 
     console.log("closing connection");

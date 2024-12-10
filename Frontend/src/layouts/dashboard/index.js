@@ -8,15 +8,20 @@ import {
   FetchUserProfile,
   SelectConversation,
   showSnackbar,
+  UpdateOutgoingInvitaion
 } from "../../redux/slices/app";
-import { socket, connectSocket } from "../../socket";
+import { socket, connectSocket,a } from "../../socket";
 import {
   UpdateDirectConversation,
+  UpdateGroupConversation,
   AddDirectConversation,
   AddDirectMessage,
+  AddGroupMessage,
   UpdateUserStatus,
   SortConversation,
-  UpdateMessageStatus
+  SortConversationGroup,
+  UpdateMessageStatus,
+  UpdateMessageGroupStatus
 } from "../../redux/slices/conversation";
 import AudioCallNotification from "../../sections/dashboard/Audio/CallNotification";
 import VideoCallNotification from "../../sections/dashboard/video/CallNotification";
@@ -32,6 +37,7 @@ import {
 } from "../../redux/slices/videoCall";
 
 const DashboardLayout = () => {
+  console.log("bị re render ")
   const isDesktop = useResponsive("up", "md");
   const dispatch = useDispatch();
   const { user_id } = useSelector((state) => state.auth);
@@ -58,21 +64,24 @@ const DashboardLayout = () => {
   };
   useEffect(() => {
     if (isLoggedIn) {
-      window.onload = function () {
-        if (!window.location.hash) {
-          window.location = window.location + "#loaded";
-          window.location.reload();
-        }
-      };
+      // window.onload = function () {
+      //   if (!window.location.hash) {
+      //     window.location = window.location + "#loaded";
+      //     window.location.reload();
+      //   }
+      // };
 
-      window.onload();
-
+      // window.onload();
+      console.log("giá trị của a là",a)
+      console.log("đã kết nối rồi nè", socket)
       if (!socket) {
+        console.log("Khởi tạo socket")
         connectSocket(user_id);
         socket.on("connect", () => {
           console.log("Kết nối thành công tới socket có id là: ", socket.id);
         });
       }
+      else console.log("đã kết nối rồi", socket.id)
       socket.on("user_status_update", (data) => {
         // TODO => dispatch an action to add this in call_queue
         dispatch(UpdateUserStatus(data));
@@ -87,12 +96,26 @@ const DashboardLayout = () => {
         dispatch(PushToVideoCallQueue(data));
       });
       socket.on("seen_message_notification", (data) => {
-            console.log("thông báo về người nhận đã xem tin nhắn",data)
-        dispatch(UpdateMessageStatus({conversation_id:data.conversation_id,type:"Notification of viewed messages"}));
+        console.log("thông báo về người nhận đã xem tin nhắn", data);
+        dispatch(
+          UpdateMessageStatus({
+            conversation_id: data.conversation_id,
+            type: "Notification of viewed messages",
+          })
+        );
+      });
+      socket.on("seen_message_group_notification", (data) => {
+        console.log("thông báo về người nhận đã xem tin nhắn", data);
+        dispatch(
+          UpdateMessageGroupStatus({
+            conversation_id: data.conversation_id,
+            type: "Notification of viewed messages",
+          })
+        );
       });
       socket.on("new_message", (data) => {
-        const {message,conversation_id} = data;
-
+        const { message, conversation_id } = data;
+        console.log('nhận rồi đừng gửi nữa')
         console.log("nhận được tin nhắn");
         console.log(data);
 
@@ -123,20 +146,45 @@ const DashboardLayout = () => {
           })
         );
       });
+      socket.on("new_message_group",(data)=>{
+        const { message, conversation_id } = data;
+        console.log("nhận được tin nhắn group");
+        console.log(data);
 
+        console.log(current_conversation);
+        dispatch(
+          SortConversationGroup({
+            room_id: data.conversation_id,
+          })
+        );
+        dispatch(
+          UpdateGroupConversation({
+            conversation: data.conversation_id,
+            msg: message,
+          })
+        );
+
+        dispatch(
+          AddGroupMessage({
+            message: {
+              id: message._id,
+              type: "msg",
+              subtype: message.type,
+              message: message.text,
+              incoming: message.from !== user_id,
+              outgoing: message.from === user_id,
+              from:data.from
+            },
+            conversation_id,
+          })
+        );
+      })
       socket.on("start_chat", (data) => {
         console.log(data);
         // add / update to conversation list
-        const existing_conversation = conversations.find(
-          (el) => el?.id === data._id
-        );
-        if (existing_conversation) {
-          // update direct conversation
-          dispatch(UpdateDirectConversation({ conversation: data }));
-        } else {
-          // add direct conversation
-          dispatch(AddDirectConversation({ conversation: data }));
-        }
+
+        dispatch(AddDirectConversation({ conversation: data }));
+
         dispatch(SelectConversation({ room_id: data._id }));
       });
 
@@ -156,6 +204,7 @@ const DashboardLayout = () => {
             message: "Friend Request Accepted",
           })
         );
+        dispatch(UpdateOutgoingInvitaion({invitation:data.id,type:"remove"}))
       });
 
       socket.on("request_sent", (data) => {
@@ -170,6 +219,7 @@ const DashboardLayout = () => {
       socket?.off("request_sent");
       socket?.off("start_chat");
       socket?.off("new_message");
+      socket?.off("new_message_group");
       socket?.off("audio_call_notification");
       socket?.off("video_call_notification");
     };

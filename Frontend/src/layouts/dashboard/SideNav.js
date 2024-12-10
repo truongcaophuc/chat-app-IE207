@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect} from "react";
 import { useTheme } from "@mui/material/styles";
 
 import { Box, Divider, IconButton, Stack } from "@mui/material";
@@ -32,7 +32,24 @@ const getPath = (index) => {
       break;
   }
 };
+const getIndex = (path) => {
+  switch (path) {
+    case "app":
+      return 0;
 
+    case "group":
+      return 1;
+
+    case "call":
+      return 2;
+
+    case "settings":
+      return 3;
+
+    default:
+      break;
+  }
+};
 const SideBar = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -43,10 +60,15 @@ const SideBar = () => {
 
   const { onToggleMode } = useSettings();
 
+  useEffect(() => {
+    const index = getIndex(window.location.pathname.split("/")[1]);
+    dispatch(UpdateTab({ tab: index }));
+  })
+
   const selectedTab = tab;
 
   const handleChangeTab = (index) => {
-    dispatch(UpdateTab({ tab: index }));
+    //dispatch(UpdateTab({ tab: index }));
     navigate(getPath(index));
   };
 
@@ -70,26 +92,28 @@ const SideBar = () => {
         sx={{ height: "100%" }}
       >
         <Stack alignItems={"center"} spacing={4}>
-          <Box
+          <img src={Logo} alt="Tawk" width={80} height={80} />
+          {/* <Box
             sx={{
               height: 64,
               width: 64,
               borderRadius: 1.5,
-              backgroundColor: theme.palette.primary.main,
+              overflow: 'hidden' 
             }}
             p={1}
           >
-            <img src={Logo} alt="Tawk" />
-          </Box>
+            <img src={Logo} alt="Tawk" width={100} height={100}/>
+          </Box> */}
           <Stack
             sx={{ width: "max-content" }}
             direction="column"
             alignItems={"center"}
             spacing={3}
           >
-            {Nav_Buttons.map((el,index) => {
+            {Nav_Buttons.map((el, index) => {
               return el.index == selectedTab ? (
-                <Box key={index}
+                <Box
+                  key={index}
                   sx={{
                     backgroundColor: theme.palette.primary.main,
                     borderRadius: 1.5,
@@ -123,7 +147,7 @@ const SideBar = () => {
               );
             })}
             <Divider sx={{ width: 48 }} />
-            {Nav_Setting.map((el,index) => {
+            {Nav_Setting.map((el, index) => {
               return el.index == selectedTab ? (
                 <Box
                   sx={{
