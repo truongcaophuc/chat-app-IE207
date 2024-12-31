@@ -15,7 +15,7 @@ import { Message_options } from "../../data";
 import { Link } from "react-router-dom";
 import truncateString from "../../utils/truncate";
 import { LinkPreview } from "@dhaiwat10/react-link-preview";
-import Embed from "react-embed";
+import { SocialMediaEmbed } from "react-social-media-embed";
 import { useDispatch, useSelector } from "react-redux";
 const MessageOption = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -221,9 +221,8 @@ const LinkMsg = ({ el, menu }) => {
             }}
           >
             <Stack direction={"column"} spacing={2}>
-              <Embed
-                width="300px"
-                isDark
+              <SocialMediaEmbed
+                width={300}
                 url={`https://youtu.be/xoWxBR34qLE`}
               />
             </Stack>
