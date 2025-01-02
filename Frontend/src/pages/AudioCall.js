@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useDispatch, useSelector } from "react-redux";
-import { ResetVideoCallQueue } from "../redux/slices/videoCall";
+import { ResetAudioCallQueue } from "../redux/slices/audioCall";
 // Hàm tạo ID ngẫu nhiên
 function randomID(len) {
   let result = "";
@@ -18,10 +18,10 @@ function randomID(len) {
 export default function App() {
   const dispatch = useDispatch();
   const zego = useRef(null);
-  const [videoCall] = useSelector((state) => state.videoCall.call_queue);
+  const [audioCall] = useSelector((state) => state.audioCall.call_queue);
   const { firstName, lastName } = useSelector((state) => state.app.user);
   const userName = firstName + " " + lastName;
-  const roomID = videoCall?.roomID;
+  const roomID = audioCall?.roomID;
   const myMeeting = async (element) => {
     if (!element) return;
     const appID = 1389463141;
@@ -53,9 +53,9 @@ export default function App() {
       scenario: {
         mode: ZegoUIKitPrebuilt.OneONoneCall, // Sử dụng GroupCall. Để gọi 1-1, thay bằng OneONoneCall.
       },
-      turnOnCameraWhenJoining: true,
+      turnOnCameraWhenJoining: false,
       onLeaveRoom: () => {
-        dispatch(ResetVideoCallQueue());
+        dispatch(ResetAudioCallQueue());
         window.location.href = "/app";
       },
     });

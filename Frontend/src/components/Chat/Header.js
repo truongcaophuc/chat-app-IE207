@@ -11,6 +11,7 @@ import {
   styled,
   Typography,
 } from "@mui/material";
+import {useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
 import { faker } from "@faker-js/faker";
@@ -67,6 +68,7 @@ const Conversation_Menu = [
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
 
@@ -160,6 +162,7 @@ const ChatHeader = () => {
             <IconButton
               onClick={() => {
                 dispatch(StartVideoCall(current_conversation.user_id));
+                //navigate("/call?type=video")
               }}
             >
               <VideoCamera />
@@ -167,6 +170,7 @@ const ChatHeader = () => {
             <IconButton
               onClick={() => {
                 dispatch(StartAudioCall(current_conversation.user_id));
+                //navigate("/call?type=audio")
               }}
             >
               <Phone />

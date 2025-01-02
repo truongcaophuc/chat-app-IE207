@@ -43,13 +43,14 @@ export default function Router() {
         { path: "contact", element: <Contact /> },
         { path: "profile", element: <Profile /> },
 
-        //{path: "call", element: <CallPage />},
+        {path: "call", element: <CallPage />},
         
         { path: "404", element: <Page404 /> },
         { path: "*", element: <Navigate to="/404" replace /> },
       ],
     },
-    { path: "/call", element: <CallPage /> },
+    { path: "/videocall", element: <VideoCallPage /> },
+    { path: "/audiocall", element: <AudioCallPage /> },
     { path: "*", element: <Navigate to="/404" replace /> },
   ]);
 }
@@ -62,7 +63,9 @@ const Conversation = Loadable(
 );
 const Chats = Loadable(lazy(() => import("../pages/dashboard/Chats")));
 const Group = Loadable(lazy(() => import("../pages/dashboard/Group")));
-const CallPage = Loadable(lazy(() => import("../pages/VideoCall")));
+const VideoCallPage = Loadable(lazy(() => import("../pages/VideoCall")));
+const AudioCallPage = Loadable(lazy(() => import("../pages/AudioCall")));
+const CallPage = Loadable(lazy(() => import("../pages/dashboard/Call")));
 const Contact = Loadable(lazy(() => import("../sections/dashboard/Contact")));
 const Page404 = Loadable(lazy(() => import("../pages/Page404")));
 

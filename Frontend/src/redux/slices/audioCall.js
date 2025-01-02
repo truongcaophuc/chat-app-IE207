@@ -41,6 +41,9 @@ const slice = createSlice({
     closeNotificationDialog(state, action) {
       state.open_audio_notification_dialog = false;
     },
+    closeDialog(state, action) {
+      state.open_audio_dialog = false;
+    },
     updateCallDialog(state, action) {
       state.open_audio_dialog = action.payload.state;
       state.open_audio_notification_dialog = false;
@@ -101,7 +104,11 @@ export const CloseAudioNotificationDialog = () => {
     dispatch(slice.actions.closeNotificationDialog());
   };
 };
-
+export const CloseAudioDialog = () => {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.closeDialog());
+  };
+};
 export const UpdateAudioCallDialog = ({ state }) => {
   return async (dispatch, getState) => {
     dispatch(slice.actions.updateCallDialog({ state }));

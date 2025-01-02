@@ -27,13 +27,15 @@ import AudioCallNotification from "../../sections/dashboard/Audio/CallNotificati
 import VideoCallNotification from "../../sections/dashboard/video/CallNotification";
 import {
   PushToAudioCallQueue,
-  UpdateAudioCallDialog,
+  CloseAudioNotificationDialog,
+  CloseAudioDialog
 } from "../../redux/slices/audioCall";
 import AudioCallDialog from "../../sections/dashboard/Audio/CallDialog";
 import VideoCallDialog from "../../sections/dashboard/video/CallDialog";
 import {
   PushToVideoCallQueue,
-  UpdateVideoCallDialog,
+  CloseVideoNotificationDialog,
+  CloseVideoDialog
 } from "../../redux/slices/videoCall";
 
 const DashboardLayout = () => {
@@ -57,10 +59,16 @@ const DashboardLayout = () => {
   }, []);
 
   const handleCloseAudioDialog = () => {
-    dispatch(UpdateAudioCallDialog({ state: false }));
+    dispatch(CloseAudioDialog());
   };
   const handleCloseVideoDialog = () => {
-    dispatch(UpdateVideoCallDialog({ state: false }));
+    dispatch(CloseVideoDialog());
+  };
+  const handleCloseAudioNotificationDialog = () => {
+    dispatch(CloseAudioNotificationDialog());
+  };
+  const handleCloseVideoNotificationDialog = () => {
+    dispatch(CloseVideoNotificationDialog());
   };
   useEffect(() => {
     if (isLoggedIn) {
@@ -239,7 +247,7 @@ const DashboardLayout = () => {
         <Outlet />
       </Stack>
       {open_audio_notification_dialog && (
-        <AudioCallNotification open={open_audio_notification_dialog} />
+        <AudioCallNotification open={open_audio_notification_dialog}  handleClose={handleCloseAudioNotificationDialog}/>
       )}
       {open_audio_dialog && (
         <AudioCallDialog
@@ -248,7 +256,7 @@ const DashboardLayout = () => {
         />
       )}
       {open_video_notification_dialog && (
-        <VideoCallNotification open={open_video_notification_dialog} />
+        <VideoCallNotification open={open_video_notification_dialog}  handleClose={handleCloseVideoNotificationDialog}/>
       )}
       {open_video_dialog && (
         <VideoCallDialog

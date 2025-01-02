@@ -66,9 +66,9 @@ io.on("connection", async (socket) => {
       }).select("_id");
       groups_id.forEach((group_id) => {
         socket.join(group_id._id.toString());
-        console.log(`${socket.id} joined room: ${group_id}`);
+        //console.log(`${socket.id} joined room: ${group_id}`);
       });
-      console.log("đã cập nhật trạng thái thành công");
+      //console.log("đã cập nhật trạng thái thành công");
       io.emit("user_status_update", { _id: user_id, status: "Online" });
     } catch (e) {
       console.log(e);
@@ -230,7 +230,7 @@ io.on("connection", async (socket) => {
   socket.on("new_message_group", async (data, callback) => {
     try {
       const { message, conversation_id, from, type } = data;
-      console.log('All rooms:', (socket.rooms));
+      console.log("All rooms:", socket.rooms);
       // message => {to, from, type, created_at, text, file}
 
       const new_message = {
@@ -244,15 +244,13 @@ io.on("connection", async (socket) => {
       const chat = await GroupConversation.findById(conversation_id);
       chat.messages.push(new_message);
       // save to db`
-      console.log(
-        "conversation id",conversation_id
-      )
-      const from_user = await User.find({_id:from})
+      console.log("conversation id", conversation_id);
+      const from_user = await User.find({ _id: from });
       await chat.save({ new: true, validateModifiedOnly: true });
       socket.to(conversation_id).emit("new_message_group", {
         conversation_id,
         message: new_message,
-        from:from_user.firstName+" "+from_user.lastName
+        from: from_user.firstName + " " + from_user.lastName,
       });
       // emit incoming_message -> to user
     } catch (error) {
@@ -472,54 +470,119 @@ io.on("connection", async (socket) => {
     // send notification to receiver of call
     io.to(to_user?.socket_id).emit("video_call_notification", {
       from: from_user,
+      to: to_user,
       roomID,
-      streamID: from,
-      userID: to,
-      userName: to,
     });
   });
 
   // handle video_call_not_picked
   socket.on("video_call_not_picked", async (data) => {
-    //  console.log(data);
     // find and update call record
-    const { to, from } = data;
-
-    const to_user = await User.findById(to);
-
-    await VideoCall.findOneAndUpdate(
-      {
-        participants: { $size: 2, $all: [to, from] },
-      },
-      { verdict: "Missed", status: "Ended", endedAt: Date.now() }
-    );
-
-    // TODO => emit call_missed to receiver of call
-    io.to(to_user?.socket_id).emit("video_call_missed", {
-      from,
-      to,
-    });
+    try {
+      const { to, from,roomID } = data;
+      await VideoCall.findOneAndUpdate(
+        {
+          _id: roomID
+        },
+        { verdict: "Missed", status: "Ended", endedAt: Date.now() }
+      );
+      // TODO => emit call_missed to receiver of call
+      socket.emit("video_call_missed", {
+        from,
+        to,
+      });
+    } catch (err) {
+      console.log(err);
+    }
   });
+  socket.on("cancel_audiocall", async (data) => {
+    // find and update call record
+    try {
+      console.log("hủy cuộc gọi")
+      const { to, from,roomID } = data;
 
+      const to_user = await User.findById(to);
+
+      await AudioCall.findOneAndUpdate(
+        {
+          _id:roomID
+        },
+        { verdict: "Canceled", status: "Ended", endedAt: Date.now() }
+      );
+      io.to(to_user?.socket_id).emit("audio_call_canceled", {
+        from,
+        to,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+  socket.on("cancel_videocall", async (data) => {
+    // find and update call record
+    try {
+      console.log("hủy cuộc gọi")
+      const { to, from,roomID } = data;
+
+      const to_user = await User.findById(to);
+
+      await VideoCall.findOneAndUpdate(
+        {
+          _id:roomID
+        },
+        { verdict: "Canceled", status: "Ended", endedAt: Date.now() }
+      );
+      io.to(to_user?.socket_id).emit("video_call_canceled", {
+        from,
+        to,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+  socket.on("end_call", async (data) => {
+    // find and update call record
+    try {
+      console.log("kết thúc cuộc gọi")
+      const { to,roomID } = data;
+
+      const to_user = await User.findById(to);
+      await VideoCall.findOneAndUpdate(
+        {
+          _id:roomID
+        },
+        { verdict: "Completed", status: "Ended", endedAt: Date.now() }
+      );
+      io.to(to_user?.socket_id).emit("video_call_ended", {
+        from,
+        to,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
   // handle video_call_accepted
   socket.on("video_call_accepted", async (data) => {
-    const { to, from } = data;
+    try {
+      const { to, from } = data;
 
-    const from_user = await User.findById(from);
+      const from_user = await User.findById(from);
 
-    // find and update call record
-    await VideoCall.findOneAndUpdate(
-      {
-        participants: { $size: 2, $all: [to, from] },
-      },
-      { verdict: "Accepted" }
-    );
+      // find and update call record
+      await VideoCall.findOneAndUpdate(
+        {
+          participants: { $size: 2, $all: [to, from] },
+        },
+        { verdict: "Accepted" }
+      );
 
-    // TODO => emit call_accepted to sender of call
-    io.to(from_user?.socket_id).emit("video_call_accepted", {
-      from,
-      to,
-    });
+      // TODO => emit call_accepted to sender of call
+      io.to(from_user?.socket_id).emit("video_call_accepted", {
+        from,
+        to,
+      });
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   // handle video_call_denied

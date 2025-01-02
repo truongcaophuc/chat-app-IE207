@@ -19,11 +19,13 @@ const slice = createSlice({
       if (state.call_queue.length === 0) {
         state.call_queue.push(action.payload.call);
         if (action.payload.incoming) {
+          console.log("tao đã nhận tin nhắn")
           state.open_video_notification_dialog = true; // this will open up the call dialog
           state.incoming = true;
         }
         else {
           state.open_video_dialog = true;
+          console.log("tao vừa mới gọi")
           state.incoming = false;
         }
       } else {
@@ -40,6 +42,9 @@ const slice = createSlice({
     },
     closeNotificationDialog(state, action) {
       state.open_video_notification_dialog = false;
+    },
+    closeDialog(state, action) {
+      state.open_video_dialog = false;
     },
     updateCallDialog(state, action) {
       state.open_video_dialog = action.payload.state;
@@ -85,6 +90,7 @@ export const StartVideoCall = (id) => {
 export const PushToVideoCallQueue = (call) => {
   return async (dispatch, getState) => {
     dispatch(slice.actions.pushToVideoCallQueue({call, incoming: true}));
+    console.log("ta đến đây")
   };
 };
 
@@ -99,7 +105,11 @@ export const CloseVideoNotificationDialog = () => {
     dispatch(slice.actions.closeNotificationDialog());
   };
 };
-
+export const CloseVideoDialog = () => {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.closeDialog());
+  };
+};
 export const UpdateVideoCallDialog = ({ state }) => {
   return async (dispatch, getState) => {
     dispatch(slice.actions.updateCallDialog({ state }));

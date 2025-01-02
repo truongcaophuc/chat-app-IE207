@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -6,335 +6,81 @@ import {
   DialogContent,
   Slide,
   Stack,
+  IconButton,
+  Typography,
+  Box,
 } from "@mui/material";
-import { ZegoExpressEngine } from "zego-express-engine-webrtc";
+import Avatar from "react-avatar";
+import { PhoneDisconnect } from "phosphor-react";
 import { useDispatch, useSelector } from "react-redux";
-import axiosInstance from "../../../utils/axios";
 import { socket } from "../../../socket";
 import { ResetVideoCallQueue } from "../../../redux/slices/videoCall";
-//04AAAAAGc/+V4AEGJmZzd2a2txdjNibGt6b3QAwKELciuNhLxYowCzMk4ny+6U/p0G9jNIZ8uWrEK51dq9A86d1uUoNtm5Z6Rmyl4au6tK6mI6vRq7cWh6HxwGGJpdiv+ZuXSTwWO211pFIyYPNZY0XpA8QB02biU4D176crbfNwUd3bck1h8wfuEn8RTHfbSbSGdbbr8vB32/gmnQZ+HJw+PrqxdFDz+bjyXah1c6DbaSsVaZuG8t+4GNoU/gTanNIx0WBQm0uy0TIyXvyWvpp4yS9QWjfHoJteA3/A==
+import { useNavigate } from "react-router-dom";
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const CallDialog = ({ open, handleClose }) => {
   const dispatch = useDispatch();
-
-  const audioStreamRef = useRef(null);
-  const videoStreamRef = useRef(null);
-
-  //* Use params from call_details if available => like in case of receiver's end
-
+  const navigate = useNavigate();
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
   const [call_details] = useSelector((state) => state.videoCall.call_queue);
+  const { from, to } = call_details;
   const { incoming } = useSelector((state) => state.videoCall);
-
-  const { token } = useSelector((state) => state.auth);
-
-  const appID = 507490280;
-  const server = "wss://webliveroom507490280-api.coolzcloud.com/ws";
-
-  // roomID => ID of conversation => current_conversation.id
-  // token => generate on backend & get on App
-  // userID => ID of this user
-  // userName => slug formed by user's name
-
   const roomID = call_details?.roomID;
-  const userID = call_details?.userID;
-  const userName = call_details?.userName;
-
-  // Step 1
-
-  // Initialize the ZegoExpressEngine instance
-  
-  const zg = new ZegoExpressEngine(appID, server);
-
-
-  const audioStreamID = `audio_${call_details?.streamID}`;
-  const videoStreamID = `video_${call_details?.streamID}`;
-
+  const [statusCall, setStatusCall] = useState("Đang đổ chuông");
   const handleDisconnect = (event, reason) => {
     if (reason && reason === "backdropClick") {
       return;
     } else {
-      // clean up event listners
       socket?.off("video_call_accepted");
       socket?.off("video_call_denied");
       socket?.off("video_call_missed");
-
-      // stop publishing local audio & video stream to remote users, call the stopPublishingStream method with the corresponding stream ID passed to the streamID parameter.
-
-      zg.stopPublishingStream(audioStreamID);
-      zg.stopPublishingStream(videoStreamID);
-      // stop playing a remote audio
-      zg.stopPlayingStream(`audio_${userID}`);
-      zg.stopPlayingStream(`video_${userID}`);
-      zg.destroyStream(audioStreamRef.current);
-      zg.destroyStream(videoStreamRef.current);
-      // log out of the room
-      zg.logoutRoom(roomID);
-
-      // handle Call Disconnection => this will be handled as cleanup when this dialog unmounts
-
-      // at the end call handleClose Dialog
-      dispatch(ResetVideoCallQueue());
-      handleClose();
+      setTimeout(() => {
+        dispatch(ResetVideoCallQueue());
+        handleClose();
+      }, 3000);
     }
   };
-
+  const handleCancel = () => {
+    socket.emit("cancel_videocall", { roomID, to: to._id, from: from._id });
+    dispatch(ResetVideoCallQueue());
+    handleClose();
+  };
   useEffect(() => {
-    // TODO => emit video_call event
-
-    // create a job to decline call automatically after 30 sec if not picked
-
     const timer = setTimeout(() => {
-      // TODO => You can play an audio indicating missed call at this line at sender's end
-
-      socket.emit(
-        "video_call_not_picked",
-        { to: call_details?.streamID, from: userID },
-        () => {
-          // TODO abort call => Call verdict will be marked as Missed
-        }
-      );
+      socket.emit("video_call_not_picked", {
+        to: to._id,
+        from: from._id,
+        roomID,
+      });
     }, 30 * 1000);
 
     socket.on("video_call_missed", () => {
-      // TODO => You can play an audio indicating call is missed at receiver's end
-      // Abort call
+      setStatusCall("Nguời nhận đang bận");
       handleDisconnect();
     });
 
     socket.on("video_call_accepted", () => {
-      // TODO => You can play an audio indicating call is started
-      // clear timeout for "video_call_not_picked"
       clearTimeout(timer);
+      handleClose();
+      navigate("/videocall");
     });
-
     if (!incoming) {
       socket.emit("start_video_call", {
-        to: call_details?.streamID,
-        from: userID,
+        to: to._id,
+        from: from._id,
         roomID,
       });
     }
-
     socket.on("video_call_denied", () => {
-      // TODO => You can play an audio indicating call is denined
-      // ABORT CALL
+      setStatusCall("Nguời nhận từ chối cuộc gọi");
       handleDisconnect();
     });
-
-    // make a POST API call to server & fetch token
-
-    let this_token
-
-    async function fetchToken() {
-      // You can await here
-      const response = await axiosInstance.post(
-        "/user/generate-zego-token",
-        {
-          userId: userID,
-          room_id: roomID,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response, "TOKEN RESPONSE");
-      this_token = response.data.token;
-      console.log("this_token là :",this_token)
-      // ...
-    }
-    fetchToken();
-
-    // Step 2 => Check browser compatibility
-
-    zg.checkSystemRequirements()
-      .then((result) => {
-        // The [result] indicates whether it is compatible. It indicates WebRTC is supported when the [webRTC] is [true]. For more results, see the API documents.
-
-        // {
-        //   webRTC: true,
-        //   customCapture: true,
-        //   camera: true,
-        //   microphone: true,
-        //   videoCodec: { H264: true, H265: false, VP8: true, VP9: true },
-        //   screenSharing: true,
-        //   errInfo: {}
-        // }
-        console.log("Kết quả kiểm tra",result);
-        console.log("thẻ video là",document.getElementById("local-video"))
-        console.log("Room id là :",roomID)
-        console.log("this_token là :",this_token)
-        console.log("userID là :",userID)
-        console.log("userName là :",userName)
-        const { webRTC, microphone, camera } = result;
-
-        if (webRTC && microphone && camera) {
-          console.log("Room có mã số là :",roomID)
-          console.log("Thuộc tính",Object.getOwnPropertyNames(zg));
-          zg.loginRoom(
-            roomID,
-           this_token,
-            { userID, userName },
-            { userUpdate: true }
-          )
-            .then(async (result) => {
-              
-              // zg.enablePreviewMirror(false); // Tắt lật hình khi xem trước
-              // zg.enableCaptureMirror(false); // Tắt lật hình khi gửi đến người nhận
-              console.log(result);
-              console.log("Tôi đã login phòng thành công")
-              // After calling the CreateStream method, you need to wait for the ZEGOCLOUD server to return the local stream object before any further operation.
-              const localAudioStream = await zg.createStream({
-                camera: { audio: true, video: false },
-              });
-              const localVideoStream = await zg.createStream({
-                camera: { audio: false, video: true },
-              });
-
-              audioStreamRef.current = localAudioStream;
-              videoStreamRef.current = localVideoStream;
-
-              // Get the audio tag.
-              const localAudio = document.getElementById("local-audio");
-              const localVideo = document.getElementById("local-video");
-              console.log("Thẻ video là:", localVideo)
-              // The local stream is a MediaStream object. You can render audio by assigning the local stream to the srcObject property of video or audio.
-              localAudio.srcObject = localAudioStream;
-              localVideo.srcObject = localVideoStream;
-              localVideo.style.transform = "scaleX(-1)"; 
-             // const localView=zg.createLocalStreamView(localVideoStream)
-             // localView.play("local-video",{objectFit: true})
-              localVideo.play();
-
-              // localStream is the MediaStream object created by calling creatStream in the previous step.
-              zg.startPublishingStream(audioStreamID, localAudioStream);
-              zg.startPublishingStream(videoStreamID, localVideoStream);
-
-              zg.on("publisherStateUpdate", (result) => {
-                // Callback for updates on stream publishing status.
-                // ...
-                console.log(result);
-                // * we can use this info to show connection status
-              });
-
-              zg.on("publishQualityUpdate", (streamID, stats) => {
-                // Callback for reporting stream publishing quality.
-                // ...
-                // console.log(streamID, stats);
-                // * we can use this info to show local audio stream quality
-              });
-            })
-            .catch((error) => {
-              console.log("đã bị lỗi khi kết nối room")
-              console.log(error);
-            });
-
-          // Callback for updates on the current user's room connection status.
-          zg.on("roomStateUpdate", (roomID, state, errorCode, extendedData) => {
-            if (state === "DISCONNECTED") {
-              console.log("Kết nối thất bại")
-              // Disconnected from the room
-              // * Can be used to show disconnected status for a user (especially useful in a group call)
-            }
-
-            if (state === "CONNECTING") {
-              // Connecting to the room
-              // * Can be used to show connecting status for a user (especially useful in a group call)
-            }
-
-            if (state === "CONNECTED") {
-              console.log("Đã kết nối vào phòng")
-              // Connected to the room
-              // * Can be used to show connected status for a user (especially useful in a group call)
-            }
-          });
-
-          // Callback for updates on the status of ther users in the room.
-          zg.on("roomUserUpdate", async (roomID, updateType, userList) => {
-            console.warn(
-              `roomUserUpdate: room ${roomID}, user ${
-                updateType === "ADD" ? "added" : "left"
-              } `,
-              JSON.stringify(userList)
-            );
-            if (updateType !== "ADD") {
-              
-              handleDisconnect();
-            } else {
-              // const current_users = JSON.stringify(userList);
-              // * We can use current_users_list to build dynamic UI in a group call
-              const remoteAudioStream = await zg.startPlayingStream(
-                `audio_${userID}`
-              );
-              const remoteVideoStream = await zg.startPlayingStream(
-                `video_${userID}`
-              );
-
-              // Get the audio tag.
-              const remoteAudio = document.getElementById("remote-audio");
-              const remoteVideo = document.getElementById("remote-video");
-              // The local stream is a MediaStream object. You can render audio by assigning the local stream to the srcObject property of video or audio.
-
-              remoteAudio.srcObject = remoteAudioStream;
-              remoteVideo.srcObject = remoteVideoStream;
-              remoteVideo.style.transform = "scaleX(-1)"; 
-              remoteAudio.play();
-              remoteVideo.play();
-            }
-          });
-
-          // Callback for updates on the status of the streams in the room.
-          zg.on(
-            "roomStreamUpdate",
-            async (roomID, updateType, streamList, extendedData) => {
-              if (updateType === "ADD") {
-                // New stream added, start playing the stream.
-                console.log(
-                  "ADD",
-                  roomID,
-                  updateType,
-                  streamList,
-                  extendedData
-                );
-
-                // * It would be quite useful to create and play multiple audio streams in a group call
-              } else if (updateType === "DELETE") {
-                // Stream deleted, stop playing the stream.
-                console.log(
-                  "DELETE",
-                  roomID,
-                  updateType,
-                  streamList,
-                  extendedData
-                );
-
-                // * Can be used to drop audio streams (more useful in a group call)
-              }
-            }
-          );
-
-          zg.on("playerStateUpdate", (result) => {
-            // Callback for updates on stream playing status.
-            // ...
-            // * Can be used to display realtime status of a remote audio stream (Connecting, connected & Disconnected)
-          });
-
-          zg.on("playQualityUpdate", (streamID, stats) => {
-            // Callback for reporting stream playing quality.
-            // * Can be used to display realtime quality of a remote audio stream
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   }, []);
-
   return (
     <>
       <Dialog
@@ -343,37 +89,64 @@ const CallDialog = ({ open, handleClose }) => {
         keepMounted
         onClose={handleDisconnect}
         aria-describedby="alert-dialog-slide-description"
+        sx={{
+          "& .MuiDialog-paper": {
+            width: "400px",
+            maxWidth: "90%",
+          },
+        }}
       >
-        <DialogContent>
-          <Stack direction="row" spacing={24} p={2}>
-            <Stack>
-              <video
-                style={{ height: 200, width: 200}}
-                id="local-video"
-                controls={false}
+        <DialogContent style={{ backgroundColor: "#0088FF" }}>
+          <Stack
+            direction="column"
+            spacing={2}
+            p={2}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Box className="ripple-container">
+              {/* Multiple ripple elements */}
+              <Box className="ripple" />
+              <Box className="ripple" />
+              <Avatar
+                alt={current_conversation?.name}
+                src={""}
+                name={current_conversation?.name}
+                size={80}
+                round={true}
+                className="avatar"
               />
-              <audio id="local-audio" controls={false} />
-            </Stack>
-            <Stack>
-              <video
-                style={{ height: 200, width: 200 }}
-                id="remote-video"
-                controls={false}
-              />
-              <audio id="remote-audio" controls={false} />
-            </Stack>
+            </Box>
+            <Typography style={{ color: "white", fontSize: "24px" }}>
+              {current_conversation?.name}
+            </Typography>
+            <Typography style={{ color: "white" }}>{statusCall}</Typography>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button
+        <DialogActions
+          style={{
+            backgroundColor: "#0088FF",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+        >
+          <IconButton
             onClick={() => {
-              handleDisconnect();
+              handleCancel();
             }}
-            variant="contained"
-            color="error"
+            style={{
+              display: "inline-flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "46px",
+              height: "46px",
+              border: "2px solid #FF0000",
+              borderRadius: "50%",
+              backgroundColor: "#ff0000",
+            }}
           >
-            End Call
-          </Button>
+            <PhoneDisconnect size={30} color="#ffffff" weight="fill" />
+          </IconButton>
         </DialogActions>
       </Dialog>
     </>

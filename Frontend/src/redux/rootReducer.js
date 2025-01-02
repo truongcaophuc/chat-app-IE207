@@ -14,7 +14,7 @@ const rootPersistConfig = {
   storage,
   keyPrefix: 'redux-',
   //   whitelist: [],
-  blacklist: ["app"],
+  blacklist: ["app","audioCall","videoCall"],
 };
 
 const rootReducer = combineReducers({
