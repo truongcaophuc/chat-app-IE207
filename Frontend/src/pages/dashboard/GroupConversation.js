@@ -24,7 +24,7 @@ import { socket } from "../../socket";
 const Conversation = ({ isMobile, menu }) => {
   const dispatch = useDispatch();
 
-  const { conversations, current_messages } = useSelector(
+  const { conversations, current_messages, current_conversation } = useSelector(
     (state) => state.conversation.group_chat
   );
   const { group_id } = useSelector((state) => state.app);
@@ -32,63 +32,69 @@ const Conversation = ({ isMobile, menu }) => {
   useEffect(() => {
     const current = conversations.find((el) => el?.id === group_id);
 
-    socket.emit("get_messages_group", { conversation_id: current?.id }, (data) => {
-      // data => list of messages
-      console.log(data, "List of messages");
-      dispatch(FetchCurrentMessagesGroup({ messages: data }));
-    });
+    socket.emit(
+      "get_messages_group",
+      { conversation_id: current?.id },
+      (data) => {
+        // data => list of messages
+        console.log(data, "List of messages");
+        dispatch(FetchCurrentMessagesGroup({ messages: data }));
+      }
+    );
 
     dispatch(SetCurrentGroup(current));
   }, [group_id]);
   return (
-    <Box p={isMobile ? 1 : 3}>
-      <Stack spacing={3}>
-        {current_messages.map((el, idx) => {
-          switch (el.type) {
-            case "divider":
-              return (
-                // Timeline
-                <Timeline el={el} />
-              );
+    current_conversation && (
+      <Box p={isMobile ? 1 : 3}>
+        <Stack spacing={3}>
+          {current_messages.map((el, idx) => {
+            switch (el.type) {
+              case "divider":
+                return (
+                  // Timeline
+                  <Timeline el={el} />
+                );
 
-            case "msg":
-              switch (el.subtype) {
-                case "img":
-                  return (
-                    // Media Message
-                    <MediaMsg el={el} menu={menu} />
-                  );
+              case "msg":
+                switch (el.subtype) {
+                  case "img":
+                    return (
+                      // Media Message
+                      <MediaMsg el={el} menu={menu} />
+                    );
 
-                case "doc":
-                  return (
-                    // Doc Message
-                    <DocMsg el={el} menu={menu} />
-                  );
-                case "Link":
-                  return (
-                    //  Link Message
-                    <LinkMsg el={el} menu={menu} />
-                  );
+                  case "doc":
+                    return (
+                      // Doc Message
+                      <DocMsg el={el} menu={menu} />
+                    );
+                  case "Link":
+                    return (
+                      //  Link Message
+                      <LinkMsg el={el} menu={menu} />
+                    );
 
-                case "reply":
-                  return (
-                    //  ReplyMessage
-                    <ReplyMsg el={el} menu={menu} />
-                  );
+                  case "reply":
+                    return (
+                      //  ReplyMessage
+                      <ReplyMsg el={el} menu={menu} />
+                    );
 
-                default:
-                  return (
-                    // Text Message
-                    <TextMsg el={el} menu={menu} />
-                  );
-              }
+                  default:
+                    return (
+                      // Text Message
+                      <TextMsg el={el} menu={menu} />
+                    );
+                }
 
-            default:
-              return <></>;
-          }
-        })}
-      </Stack>
-    </Box>
+              default:
+                return <></>;
+            }
+          })}
+        </Stack>
+      </Box>
+    )
   );
 };
 

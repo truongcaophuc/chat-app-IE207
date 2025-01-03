@@ -55,9 +55,9 @@ const slice = createSlice({
         const user = el.participants.find(
           (elm) => elm._id.toString() !== user_id
         );
-        const time =el.messages.length? getMessageTime(
-          el.messages[el.messages.length - 1].created_at
-        ):"";
+        const time = el.messages.length
+          ? getMessageTime(el.messages[el.messages.length - 1].created_at)
+          : "";
         const unread_message_count = el.messages.filter(
           (message) => !message.is_read && message.to === user_id
         ).length;
@@ -70,7 +70,7 @@ const slice = createSlice({
           name: `${user?.firstName} ${user?.lastName}`,
           online: user?.status === "Online",
           img: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
-          msg: el.messages.slice(-1)[0]?.text ||"",
+          msg: el.messages.slice(-1)[0]?.text || "",
           time: time,
           unread: unread_message_count,
           pinned: false,
@@ -91,18 +91,18 @@ const slice = createSlice({
         const users = el.participants.filter(
           (elm) => elm._id.toString() !== user_id
         );
-        const time =el.messages.length? getMessageTime(
-          el.messages[el.messages.length - 1].created_at
-        ):"";
+        const time = el.messages.length
+          ? getMessageTime(el.messages[el.messages.length - 1].created_at)
+          : "";
         const unread_message_count = el.messages.filter(
           (message) => !message.is_read && message.to === user_id
         ).length;
         return {
           id: el._id,
-          users:  el.participants,
+          users: el.participants,
           name: el.title,
           img: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
-          msg: el.messages.slice(-1)[0]?.text ||"",
+          msg: el.messages.slice(-1)[0]?.text || "",
           time: time,
           unread: unread_message_count,
           pinned: false,
@@ -164,8 +164,7 @@ const slice = createSlice({
     },
     addGroupConversation(state, action) {
       const this_conversation = action.payload.group;
-      console.log("nhóm mới",this_conversation)
-
+      console.log("nhóm mới", this_conversation);
 
       state.group_chat.conversations.push({
         id: this_conversation._id,
@@ -205,7 +204,7 @@ const slice = createSlice({
         message: el.text,
         incoming: el.from._id !== user_id,
         outgoing: el.from._id === user_id,
-        from:el.from.firstName+" " + el.from.lastName
+        from: el.from.firstName + " " + el.from.lastName,
       }));
       state.group_chat.current_messages = formatted_messages;
     },
@@ -271,9 +270,23 @@ const slice = createSlice({
       ];
       state.group_chat.conversations = sorted_conversation;
     },
+    leaveGroup(state, action) {
+      state.group_chat.conversations = state.group_chat.conversations.filter(
+        (conversation) => conversation.id != action.payload
+      );
+      state.group_chat.current_conversation = null;
+    },
+    addMember(state, action) {
+      const { id, members } = action.payload;
+      state.group_chat.current_conversation.users.push(members);
+      const conversation = state.group_chat.conversations.find(
+        (conversation) => conversation.id === id
+      );
+      conversation.users.push(members);
+    },
   },
 });
-
+export const { leaveGroup, addMember } = slice.actions;
 // Reducer
 export default slice.reducer;
 
@@ -290,9 +303,9 @@ export const FetchGroupConversations = ({ conversations }) => {
   };
 };
 export const AddDirectConversation = ({ conversation }) => {
-  console.log("cuộc trò chuyện mới", conversation)
+  console.log("cuộc trò chuyện mới", conversation);
   return async (dispatch, getState) => {
-    const conversations=getState().conversation.direct_chat.conversations
+    const conversations = getState().conversation.direct_chat.conversations;
     const existing_conversation = conversations.find(
       (c) => c.id === conversation._id
     );
@@ -305,9 +318,7 @@ export const AddDirectConversation = ({ conversation }) => {
 };
 export const AddGroupConversation = ({ group }) => {
   return async (dispatch, getState) => {
-   
-      dispatch(slice.actions.addGroupConversation({ group }));
-
+    dispatch(slice.actions.addGroupConversation({ group }));
   };
 };
 export const UpdateDirectConversation = ({ conversation, msg }) => {
@@ -342,10 +353,10 @@ export const FetchCurrentMessagesGroup = ({ messages }) => {
 export const AddDirectMessage = ({ message, conversation_id }) => {
   return async (dispatch, getState) => {
     if (conversation_id === getState().app.room_id) {
-      console.log("đang thêm tin nhắn")
+      console.log("đang thêm tin nhắn");
       socket.emit("message_seen", {
         conversation_id,
-        from:  getState().conversation.direct_chat.current_conversation.user_id,
+        from: getState().conversation.direct_chat.current_conversation.user_id,
       });
       dispatch(slice.actions.addDirectMessage({ message }));
     } else console.log("Bạn đang không trong phòng họp");
@@ -356,7 +367,7 @@ export const AddGroupMessage = ({ message, conversation_id }) => {
     if (conversation_id === getState().app.group_id) {
       socket.emit("message_seen", {
         conversation_id,
-        from:  getState().conversation.group_chat.current_conversation.user_id,
+        from: getState().conversation.group_chat.current_conversation.user_id,
       });
       dispatch(slice.actions.addGroupMessage({ message }));
     } else console.log("Bạn đang không trong phòng họp");

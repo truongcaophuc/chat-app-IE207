@@ -13,7 +13,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const UsersList = () => {
+const UsersList = ({handleClose}) => {
   const dispatch = useDispatch();
 
   const { users } = useSelector((state) => state.app);
@@ -25,7 +25,7 @@ const UsersList = () => {
   return (
     <>
       {users.map((el, idx) => {
-        return <UserElement key={idx} {...el} />;
+        return <UserElement key={idx} {...el} handleClose={handleClose}/>;
       })}
     </>
   );
@@ -103,7 +103,7 @@ const Friends = ({ open, handleClose }) => {
             {(() => {
               switch (value) {
                 case 0: // display all users in this list
-                  return <UsersList />;
+                  return <UsersList handleClose={handleClose}/>;
 
                 case 1: // display friends in this list
                   return <FriendsList handleClose={handleClose}/>;

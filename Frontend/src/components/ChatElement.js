@@ -3,7 +3,7 @@ import { Box, Badge, Stack, Typography } from "@mui/material";
 import { styled, useTheme, alpha } from "@mui/material/styles";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { SelectConversation,SelectGroup } from "../redux/slices/app";
+import { SelectConversation } from "../redux/slices/app";
 import { UpdateMessageStatus } from "../redux/slices/conversation";
 import { socket } from "../socket";
 import Avatar from 'react-avatar';

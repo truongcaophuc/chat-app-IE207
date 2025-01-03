@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Avatar,
   Box,
   Divider,
   IconButton,
@@ -19,15 +18,16 @@ import {
   Keyboard,
   Info,
 } from "phosphor-react";
-
+import Avatar from "react-avatar";
 import { useTheme } from "@mui/material/styles";
 import { faker } from "@faker-js/faker";
 import ThemeDialog from "../../../sections/dashboard/settings/ThemeDialog";
 import ShortcutDialog from "../../../sections/dashboard/settings/ShortcutDialog";
-
+import { useDispatch, useSelector } from "react-redux";
 const Settings = () => {
   const theme = useTheme();
-
+  const dispatch = useDispatch();
+  const { firstName,lastName } = useSelector((state) => state.app.user);
   const [openTheme, setOpenTheme] = useState(false);
 
   const handleOpenTheme = () => {
@@ -128,14 +128,17 @@ const Settings = () => {
             </Stack>
 
             {/* Profile */}
-            <Stack direction="row" spacing={3}>
-              <Avatar
-                src={faker.image.avatar()}
-                sx={{ height: 56, width: 56 }}
+            <Stack direction="row" spacing={3} alignItems="center">
+            <Avatar
+                alt={firstName+" "+lastName}
+                src={""}
+                name={firstName+" "+lastName}
+                size={56}
+                round={true}
+                className="avatar"
               />
               <Stack spacing={0.5}>
-                <Typography variant="article">{`${faker.name.firstName()} ${faker.name.lastName()}`}</Typography>
-                <Typography variant="body2">{faker.random.words()}</Typography>
+                <Typography variant="article">{firstName+" "+lastName}</Typography>
               </Stack>
             </Stack>
             {/* List */}

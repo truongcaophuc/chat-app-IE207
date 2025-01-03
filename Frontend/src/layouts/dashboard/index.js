@@ -8,9 +8,10 @@ import {
   FetchUserProfile,
   SelectConversation,
   showSnackbar,
-  UpdateOutgoingInvitaion
+  UpdateOutgoingInvitaion,
+  FetchAllUsers
 } from "../../redux/slices/app";
-import { socket, connectSocket,a } from "../../socket";
+import { socket, connectSocket } from "../../socket";
 import {
   UpdateDirectConversation,
   UpdateGroupConversation,
@@ -56,6 +57,7 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     dispatch(FetchUserProfile());
+    dispatch(FetchAllUsers());
   }, []);
 
   const handleCloseAudioDialog = () => {
@@ -72,16 +74,6 @@ const DashboardLayout = () => {
   };
   useEffect(() => {
     if (isLoggedIn) {
-      // window.onload = function () {
-      //   if (!window.location.hash) {
-      //     window.location = window.location + "#loaded";
-      //     window.location.reload();
-      //   }
-      // };
-
-      // window.onload();
-      console.log("giá trị của a là",a)
-      console.log("đã kết nối rồi nè", socket)
       if (!socket) {
         console.log("Khởi tạo socket")
         connectSocket(user_id);

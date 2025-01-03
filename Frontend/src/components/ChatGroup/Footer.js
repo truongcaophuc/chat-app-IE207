@@ -29,7 +29,7 @@ import {
   UpdateMessageStatus,
   AddGroupMessage,
   SortConversationGroup,
-  UpdateGroupConversation
+  UpdateGroupConversation,
 } from "../../redux/slices/conversation";
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -258,47 +258,45 @@ const Footer = () => {
             >
               <IconButton
                 onClick={() => {
-                  {
-                    if (value) {
-                      socket.emit("new_message_group", {
-                        message: linkify(value),
-                        conversation_id: group_id,
-                        from: user_id,
-                        type: containsUrl(value) ? "Link" : "Text",
-                      });
+                  if (value) {
+                    socket.emit("new_message_group", {
+                      message: linkify(value),
+                      conversation_id: group_id,
+                      from: user_id,
+                      type: containsUrl(value) ? "Link" : "Text",
+                    });
 
-                      dispatch(
-                        AddGroupMessage({
-                          message: {
-                            type: "msg",
-                            subtype: "Text",
-                            message: value,
-                            incoming: false,
-                            outgoing: true,
-                          },
-                          conversation_id:group_id,
-                        })
-                      );
-                      console.log("đã phát đi tin nhắn");
-                      dispatch(
-                        SortConversationGroup({
-                          room_id: group_id,
-                        })
-                      );
-                      dispatch(
-                        UpdateGroupConversation({
-                          conversation: group_id,
-                          msg: {text:value},
-                        })
-                      );
-                      dispatch(
-                        UpdateMessageStatus({
-                          conversation_id: group_id,
-                          type: "Message sent",
-                        })
-                      );
-                      setValue("");
-                    }
+                    dispatch(
+                      AddGroupMessage({
+                        message: {
+                          type: "msg",
+                          subtype: "Text",
+                          message: value,
+                          incoming: false,
+                          outgoing: true,
+                        },
+                        conversation_id: group_id,
+                      })
+                    );
+                    console.log("đã phát đi tin nhắn");
+                    dispatch(
+                      SortConversationGroup({
+                        room_id: group_id,
+                      })
+                    );
+                    dispatch(
+                      UpdateGroupConversation({
+                        conversation: group_id,
+                        msg: { text: value },
+                      })
+                    );
+                    dispatch(
+                      UpdateMessageStatus({
+                        conversation_id: group_id,
+                        type: "Message sent",
+                      })
+                    );
+                    setValue("");
                   }
                 }}
               >

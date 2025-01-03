@@ -28,7 +28,12 @@ import Friends from "../../sections/dashboard/Friends";
 import { socket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchDirectConversations } from "../../redux/slices/conversation";
-
+import {
+  FetchFriendRequests,
+  FetchFriends,
+  FetchUsers,
+  FetchFriendInvitations
+} from "../../redux/slices/app";
 const user_id = window.localStorage.getItem("user_id");
 
 const Chats = () => {
@@ -58,6 +63,7 @@ const Chats = () => {
 
       dispatch(FetchDirectConversations({ conversations: data }));
     });
+      dispatch(FetchFriends());
   }, []);
 
   const [openDialog, setOpenDialog] = useState(false);

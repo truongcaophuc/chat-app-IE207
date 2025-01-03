@@ -9,23 +9,22 @@ import { Stack } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useDispatch, useSelector } from "react-redux";
 import { UpdateUserProfile } from "../../../redux/slices/app";
-import { AWS_S3_REGION, S3_BUCKET_NAME } from "../../../config";
+
 
 const ProfileForm = () => {
   const dispatch = useDispatch();
   const [file, setFile] = useState();
   const { user } = useSelector((state) => state.app);
-
   const ProfileSchema = Yup.object().shape({
-    firstName: Yup.string().required("Name is required"),
+    name: Yup.string().required("Name is required"),
     about: Yup.string().required("About is required"),
     avatar: Yup.string().required("Avatar is required").nullable(true),
   });
 
   const defaultValues = {
-    firstName: user?.firstName,
+    Name: user?.firstName+" "+user.lastName,
     about: user?.about,
-    avatar: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
+    avatar: `https://www.kindpng.com/picc/m/421-4212275_transparent-default-avatar-png-avatar-img-png-download.png`,
   };
 
   const methods = useForm({
@@ -50,7 +49,7 @@ const ProfileForm = () => {
       console.log("DATA", data);
       dispatch(
         UpdateUserProfile({
-          firstName: data?.firstName,
+          Name: data?.name,
           about: data?.about,
           avatar: file,
         })
@@ -83,9 +82,8 @@ const ProfileForm = () => {
         <RHFUploadAvatar name="avatar" maxSize={3145728} onDrop={handleDrop} />
 
         <RHFTextField
-          helperText={"This name is visible to your contacts"}
-          name="firstName"
-          label="First Name"
+          name="Name"
+          label="Name"
         />
         <RHFTextField multiline rows={4} name="about" label="About" />
 

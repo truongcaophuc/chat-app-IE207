@@ -23,12 +23,15 @@ import { FetchCallLogs } from "../../redux/slices/app";
 
 const Call = () => {
   const dispatch = useDispatch();
+  const [searchText, setSearchText] = useState("");
   useEffect(() => {
     dispatch(FetchCallLogs());
   }, []);
   const { call_logs } = useSelector((state) => state.app);
   const [openDialog, setOpenDialog] = useState(false);
-
+  const handleSearchChange = (event) => {
+    setSearchText(event.target.value); 
+  };
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
@@ -36,6 +39,9 @@ const Call = () => {
     setOpenDialog(true);
   };
   const theme = useTheme();
+  const filter_call=call_logs.filter((call_log)=>{
+    return call_log.name.toLowerCase().includes(searchText.toLowerCase())
+  })
   return (
     <>
       <Stack direction="row" sx={{ width: "100%" }}>
@@ -72,6 +78,8 @@ const Call = () => {
                 <StyledInputBase
                   placeholder="Tìm kiếm"
                   inputProps={{ "aria-label": "search" }}
+                  value={searchText}
+                  onChange={handleSearchChange}
                 />
               </Search>
             </Stack>
@@ -89,10 +97,10 @@ const Call = () => {
               </IconButton>
             </Stack>
             <Divider />
-            <Stack sx={{ flexGrow: 1, overflow: "scrollY", height: "100%" }}>
+            <Stack sx={{ flexGrow: 1, overflowY: "scroll", height: "100%" }}>
               <SimpleBarStyle timeout={500} clickOnTrack={false}>
                 <Stack spacing={2.4}>
-                  {call_logs
+                  {filter_call
                     ?.slice()
                     .sort((a, b) => new Date(b.start) - new Date(a.start))
                     .map((el, idx) => {

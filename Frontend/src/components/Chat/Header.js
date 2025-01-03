@@ -11,12 +11,12 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import {useNavigate } from "react-router-dom";
+import { socket } from "../../socket";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
-import { faker } from "@faker-js/faker";
 import useResponsive from "../../hooks/useResponsive";
-import { ToggleSidebar } from "../../redux/slices/app";
+import { ToggleSidebar,unFriend } from "../../redux/slices/app";
 import { useDispatch, useSelector } from "react-redux";
 import { StartAudioCall } from "../../redux/slices/audioCall";
 import { StartVideoCall } from "../../redux/slices/videoCall";
@@ -51,20 +51,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const Conversation_Menu = [
-  {
-    title: "Contact info",
-  },
-  {
-    title: "Mute notifications",
-  },
-  {
-    title: "Clear messages",
-  },
-  {
-    title: "Delete chat",
-  },
-];
+
 
 const ChatHeader = () => {
   const dispatch = useDispatch();
@@ -72,12 +59,11 @@ const ChatHeader = () => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
 
-  const { current_conversation } = useSelector(
+  const { current_conversation, conversations } = useSelector(
     (state) => state.conversation.direct_chat
   );
-  const { conversations } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
+  const { friends } = useSelector((state) => state.app);
+  const { user_id } = useSelector((state) => state.auth);
   const statusUser = conversations.find(
     (conversation) => conversation.id === current_conversation?.id
   )?.online;
@@ -90,7 +76,31 @@ const ChatHeader = () => {
   const handleCloseConversationMenu = () => {
     setConversationMenuAnchorEl(null);
   };
-
+  const isFriend = friends.find(
+    (friend) => friend._id === current_conversation?.user_id
+  );
+  const Conversation_Menu = [
+    {
+      title: "Thông tin liên hệ",
+      onClick: () => {
+        // socket.emit("unfriend", {
+        //   from: user_id,
+        //   to: current_conversation.user_id,
+        // });
+        // dispatch(unFriend(current_conversation.user_id));
+      },
+    },
+    {
+      title: "Hủy kết bạn",
+      onClick: () => {
+        socket.emit("unFriend", {
+          from: user_id,
+          to: current_conversation.user_id,
+        });
+        dispatch(unFriend(current_conversation.user_id));
+      },
+    },
+  ];
   return (
     <>
       <Box
@@ -149,9 +159,17 @@ const ChatHeader = () => {
               <Typography variant="subtitle2">
                 {current_conversation?.name}
               </Typography>
-              <Typography variant="caption">
-                {statusUser ? "Online" : "Offline"}
-              </Typography>
+              <Stack direction={"row"}>
+                {!isFriend && (
+                  <Typography variant="caption" style={{ marginRight: "8px" }}>
+                    Người lạ |
+                  </Typography>
+                )}
+
+                <Typography variant="caption">
+                  {statusUser ? "Online" : "Offline"}
+                </Typography>
+              </Stack>
             </Stack>
           </Stack>
           <Stack
@@ -216,7 +234,13 @@ const ChatHeader = () => {
               <Box p={1}>
                 <Stack spacing={1}>
                   {Conversation_Menu.map((el, index) => (
-                    <MenuItem onClick={handleCloseConversationMenu} key={index}>
+                    <MenuItem
+                      onClick={() => {
+                        el.onClick();
+                        handleCloseConversationMenu();
+                      }}
+                      key={index}
+                    >
                       <Stack
                         sx={{ minWidth: 100 }}
                         direction="row"

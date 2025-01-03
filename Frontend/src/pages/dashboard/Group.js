@@ -90,7 +90,7 @@ const Group = () => {
                   <MagnifyingGlass color="#709CE6" />
                 </SearchIconWrapper>
                 <StyledInputBase
-                  placeholder="Search…"
+                  placeholder="Tìm kiếm"
                   inputProps={{ "aria-label": "search" }}
                   onChange={handleSearchChange}
                 />

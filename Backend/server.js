@@ -96,7 +96,32 @@ io.on("connection", async (socket) => {
       message: "Request Sent successfully!",
     });
   });
-
+  socket.on("unFriend", async (data) => {
+    const { from, to } = data;
+    const user = await User.findById(from);
+    if (user.friends.includes(to)) {
+      user.friends = user.friends.filter((friend) => friend != to);
+      await user.save({ new: true, validateModifiedOnly: true });
+    }
+  });
+  socket.on("leaveGroup", async (data) => {
+    const { id, user_id } = data;
+    const group = await GroupConversation.findById(id);
+    if (group.participants.includes(user_id)) {
+      group.participants = group.participants.filter(
+        (participant) => participant != user_id
+      );
+      await group.save({ new: true, validateModifiedOnly: true });
+    }
+  });
+  socket.on("addMember", async (data) => {
+    const { id, members } = data;
+    console.log("id là",id)
+    console.log("members là",members)
+    const group = await GroupConversation.findById(id);
+    group.participants=[...group.participants,...members]
+    await group.save({ new: true, validateModifiedOnly: true });
+  });
   socket.on("accept_request", async (data) => {
     // accept friend request => add ref of each other in friends array
     //console.log(data);
@@ -375,13 +400,13 @@ io.on("connection", async (socket) => {
   socket.on("audio_call_not_picked", async (data) => {
     //console.log(data);
     // find and update call record
-    const { to, from,roomID } = data;
+    const { to, from, roomID } = data;
 
     const to_user = await User.findById(to);
 
     await AudioCall.findOneAndUpdate(
       {
-        _id:roomID
+        _id: roomID,
       },
       { verdict: "Missed", status: "Ended", endedAt: Date.now() }
     );
@@ -395,14 +420,14 @@ io.on("connection", async (socket) => {
 
   // handle audio_call_accepted
   socket.on("audio_call_accepted", async (data) => {
-    const { to, from,roomID } = data;
+    const { to, from, roomID } = data;
 
     const from_user = await User.findById(from);
 
     // find and update call record
     await AudioCall.findOneAndUpdate(
       {
-        _id:roomID
+        _id: roomID,
       },
       { verdict: "Accepted" }
     );
@@ -417,11 +442,11 @@ io.on("connection", async (socket) => {
   // handle audio_call_denied
   socket.on("audio_call_denied", async (data) => {
     // find and update call record
-    const { to, from,roomID } = data;
+    const { to, from, roomID } = data;
 
     await AudioCall.findOneAndUpdate(
       {
-         _id:roomID
+        _id: roomID,
       },
       { verdict: "Denied", status: "Ended", endedAt: Date.now() }
     );
@@ -437,11 +462,11 @@ io.on("connection", async (socket) => {
 
   // handle user_is_busy_audio_call
   socket.on("user_is_busy_audio_call", async (data) => {
-    const { to, from ,roomID} = data;
+    const { to, from, roomID } = data;
     // find and update call record
     await AudioCall.findOneAndUpdate(
       {
-        _id:roomID
+        _id: roomID,
       },
       { verdict: "Busy", status: "Ended", endedAt: Date.now() }
     );
@@ -479,10 +504,10 @@ io.on("connection", async (socket) => {
   socket.on("video_call_not_picked", async (data) => {
     // find and update call record
     try {
-      const { to, from,roomID } = data;
+      const { to, from, roomID } = data;
       await VideoCall.findOneAndUpdate(
         {
-          _id: roomID
+          _id: roomID,
         },
         { verdict: "Missed", status: "Ended", endedAt: Date.now() }
       );
@@ -498,14 +523,14 @@ io.on("connection", async (socket) => {
   socket.on("cancel_audiocall", async (data) => {
     // find and update call record
     try {
-      console.log("hủy cuộc gọi")
-      const { to, from,roomID } = data;
+      console.log("hủy cuộc gọi");
+      const { to, from, roomID } = data;
 
       const to_user = await User.findById(to);
 
       await AudioCall.findOneAndUpdate(
         {
-          _id:roomID
+          _id: roomID,
         },
         { verdict: "Canceled", status: "Ended", endedAt: Date.now() }
       );
@@ -520,14 +545,14 @@ io.on("connection", async (socket) => {
   socket.on("cancel_videocall", async (data) => {
     // find and update call record
     try {
-      console.log("hủy cuộc gọi")
-      const { to, from,roomID } = data;
+      console.log("hủy cuộc gọi");
+      const { to, from, roomID } = data;
 
       const to_user = await User.findById(to);
 
       await VideoCall.findOneAndUpdate(
         {
-          _id:roomID
+          _id: roomID,
         },
         { verdict: "Canceled", status: "Ended", endedAt: Date.now() }
       );
@@ -542,11 +567,11 @@ io.on("connection", async (socket) => {
   socket.on("end_audiocall", async (data) => {
     // find and update call record
     try {
-      console.log("kết thúc cuộc gọi")
+      console.log("kết thúc cuộc gọi");
       const { roomID } = data;
       await AudioCall.findOneAndUpdate(
         {
-          _id:roomID
+          _id: roomID,
         },
         { status: "Ended", endedAt: Date.now() }
       );
@@ -557,11 +582,11 @@ io.on("connection", async (socket) => {
   socket.on("end_videocall", async (data) => {
     // find and update call record
     try {
-      console.log("kết thúc cuộc gọi")
+      console.log("kết thúc cuộc gọi");
       const { roomID } = data;
       await VideoCall.findOneAndUpdate(
         {
-          _id:roomID
+          _id: roomID,
         },
         { status: "Ended", endedAt: Date.now() }
       );
@@ -572,14 +597,14 @@ io.on("connection", async (socket) => {
   // handle video_call_accepted
   socket.on("video_call_accepted", async (data) => {
     try {
-      const { to, from,roomID } = data;
+      const { to, from, roomID } = data;
 
       const from_user = await User.findById(from);
 
       // find and update call record
       await VideoCall.findOneAndUpdate(
         {
-          _id:roomID
+          _id: roomID,
         },
         { verdict: "Accepted" }
       );
@@ -597,11 +622,11 @@ io.on("connection", async (socket) => {
   // handle video_call_denied
   socket.on("video_call_denied", async (data) => {
     // find and update call record
-    const { to, from,roomID } = data;
+    const { to, from, roomID } = data;
 
     await VideoCall.findOneAndUpdate(
       {
-        _id:roomID
+        _id: roomID,
       },
       { verdict: "Denied", status: "Ended", endedAt: Date.now() }
     );
@@ -617,11 +642,11 @@ io.on("connection", async (socket) => {
 
   // handle user_is_busy_video_call
   socket.on("user_is_busy_video_call", async (data) => {
-    const { to, from ,roomID} = data;
+    const { to, from, roomID } = data;
     // find and update call record
     await VideoCall.findOneAndUpdate(
       {
-        _id:roomID
+        _id: roomID,
       },
       { verdict: "Busy", status: "Ended", endedAt: Date.now() }
     );

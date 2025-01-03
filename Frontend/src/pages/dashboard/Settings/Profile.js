@@ -2,12 +2,10 @@ import React, { useEffect } from "react";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { CaretLeft } from "phosphor-react";
 import ProfileForm from "../../../sections/dashboard/settings/ProfileForm";
-import { useDispatch } from "react-redux";
 import { FetchUserProfile } from "../../../redux/slices/app";
-
+import { useDispatch, useSelector } from "react-redux";
 const Profile = () => {
   const dispatch = useDispatch();
-  
   useEffect(() => {
     dispatch(FetchUserProfile());
   }, []);

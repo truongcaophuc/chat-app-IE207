@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Badge,
   Box,
@@ -12,11 +12,13 @@ import {
   Typography,
   Avatar as AvatarMUI,
 } from "@mui/material";
+import AddMemberDialog from "../../sections/dashboard/AddMemberDialog"; // Import dialog đã tạo
+import { socket } from "../../socket";
 import { useTheme } from "@mui/material/styles";
 import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
-import { faker } from "@faker-js/faker";
 import useResponsive from "../../hooks/useResponsive";
-import { ToggleSidebar } from "../../redux/slices/app";
+import { ToggleSidebar, resetGroup } from "../../redux/slices/app";
+import { leaveGroup, addMember } from "../../redux/slices/conversation";
 import { useDispatch, useSelector } from "react-redux";
 import { StartAudioCall } from "../../redux/slices/audioCall";
 import { StartVideoCall } from "../../redux/slices/videoCall";
@@ -51,29 +53,16 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const Conversation_Menu = [
-  {
-    title: "Contact info",
-  },
-  {
-    title: "Mute notifications",
-  },
-  {
-    title: "Clear messages",
-  },
-  {
-    title: "Delete chat",
-  },
-];
-
 const ChatHeader = () => {
   const dispatch = useDispatch();
+  const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
-
+  const { all_users } = useSelector((state) => state.app);
   const { current_conversation } = useSelector(
     (state) => state.conversation.group_chat
   );
+  const { user_id } = useSelector((state) => state.auth);
   console.log("current", current_conversation);
   // const { conversations } = useSelector(
   //   (state) => state.conversation.group_chat
@@ -90,8 +79,53 @@ const ChatHeader = () => {
   const maxDisplay = 4; // Số lượng avatar tối đa hiển thị
   const displayMembers = current_conversation?.users?.slice(0, maxDisplay);
   const extraCount = current_conversation?.users?.length - (maxDisplay - 1);
+  const handleOpenAddMemberDialog = () => {
+    setOpenAddMemberDialog(true);
+  };
+  const handleCloseAddMemberDialog = () => {
+    setOpenAddMemberDialog(false);
+  };
+
+  const handleAddMembers = (selectedMembers) => {
+    console.log("Thành viên được thêm:", selectedMembers);
+    // Gửi thông tin thành viên được chọn lên server
+    socket.emit("addMember", {
+      id: current_conversation.id,
+      members: selectedMembers,
+    });
+    dispatch(
+      addMember({
+        id: current_conversation.id,
+        members: selectedMembers,
+      })
+    );
+  };
+  const Conversation_Menu = [
+    {
+      title: "Thêm thành viên",
+      onClick: handleOpenAddMemberDialog,
+    },
+    {
+      title: "Rời nhóm",
+      onClick: () => {
+        socket.emit("leaveGroup", {
+          user_id,
+          id: current_conversation.id,
+        });
+        dispatch(resetGroup());
+        dispatch(leaveGroup(current_conversation.id));
+      },
+    },
+  ];
   return (
     <>
+      <AddMemberDialog
+        open={openAddMemberDialog}
+        handleClose={handleCloseAddMemberDialog}
+        members={current_conversation.users}
+        onAdd={handleAddMembers}
+        users={all_users}
+      />
       <Box
         p={2}
         width={"100%"}
@@ -115,6 +149,7 @@ const ChatHeader = () => {
             }}
             spacing={2}
             direction="row"
+            alignItems={"center"}
           >
             <Box sx={{ position: "relative", width: 45, height: 45 }}>
               {displayMembers?.map((member, index) => (
@@ -152,7 +187,7 @@ const ChatHeader = () => {
               )}
             </Box>
             <Stack spacing={0.2}>
-              <Typography variant="subtitle2">
+              <Typography style={{ fontSize: "20px", fontWeight: 700 }}>
                 {current_conversation?.name}
               </Typography>
               <Typography variant="caption">
@@ -220,7 +255,14 @@ const ChatHeader = () => {
               <Box p={1}>
                 <Stack spacing={1}>
                   {Conversation_Menu.map((el, index) => (
-                    <MenuItem onClick={handleCloseConversationMenu} key={index}>
+                    <MenuItem
+                      onClick={() => {
+                        console.log("click rồi");
+                        el.onClick();
+                        handleCloseConversationMenu();
+                      }}
+                      key={index}
+                    >
                       <Stack
                         sx={{ minWidth: 100 }}
                         direction="row"

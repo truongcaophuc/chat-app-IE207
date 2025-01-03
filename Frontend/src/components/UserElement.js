@@ -12,9 +12,7 @@ import { Chat } from "phosphor-react";
 import { socket } from "../socket";
 import Avatar from "react-avatar";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  UpdateOutgoingInvitaion
-} from "../redux/slices/app";
+import { UpdateOutgoingInvitaion } from "../redux/slices/app";
 const user_id = window.localStorage.getItem("user_id");
 
 const StyledChatBox = styled(Box)(({ theme }) => ({
@@ -52,7 +50,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const UserElement = ({ img, firstName, lastName, online, _id }) => {
+const UserElement = ({
+  img,
+  firstName,
+  lastName,
+  online,
+  _id,
+  handleClose,
+}) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { outgoingInvitations } = useSelector((state) => state.app);
@@ -92,18 +97,34 @@ const UserElement = ({ img, firstName, lastName, online, _id }) => {
           </Stack>
         </Stack>
         <Stack direction={"row"} spacing={2} alignItems={"center"}>
+
           <Button
             onClick={() => {
               console.log("đã gửi lời mời kết bạn");
-              if(!outgoingInvitations.includes(_id))
-              socket.emit("friend_request", { to: _id, from: user_id }, () => {
-                alert("request sent");
-              });
-              dispatch(UpdateOutgoingInvitaion({invitation:_id,type:"add"}))
+              if (!outgoingInvitations.includes(_id))
+                socket.emit(
+                  "friend_request",
+                  { to: _id, from: user_id },
+                  () => {
+                    alert("request sent");
+                  }
+                );
+              dispatch(
+                UpdateOutgoingInvitaion({ invitation: _id, type: "add" })
+              );
             }}
           >
-            {outgoingInvitations.includes(_id)?"Đã gửi lời mời":"Kết bạn"}
+            {outgoingInvitations.includes(_id) ? "Đã gửi lời mời" : "Kết bạn"}
           </Button>
+          <IconButton
+            onClick={() => {
+              // start a new conversation
+              socket.emit("start_conversation", { to: _id, from: user_id });
+              handleClose();
+            }}
+          >
+            <Chat />
+          </IconButton>
         </Stack>
       </Stack>
     </StyledChatBox>
@@ -181,7 +202,7 @@ const FriendElement = ({
   missed,
   online,
   _id,
-  handleClose
+  handleClose,
 }) => {
   const theme = useTheme();
   const name = `${firstName} ${lastName}`;
@@ -210,7 +231,7 @@ const FriendElement = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-             <Avatar alt={name} src={""} name={name} size={40} round={true} />
+              <Avatar alt={name} src={""} name={name} size={40} round={true} />
             </StyledBadge>
           ) : (
             <Avatar alt={name} src={""} name={name} size={40} round={true} />
@@ -223,9 +244,9 @@ const FriendElement = ({
           <IconButton
             onClick={() => {
               // start a new conversation
-              console.log("Start a new conversation")
+              console.log("Start a new conversation");
               socket.emit("start_conversation", { to: _id, from: user_id });
-              handleClose()
+              handleClose();
             }}
           >
             <Chat />

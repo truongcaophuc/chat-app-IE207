@@ -29,7 +29,7 @@ import {
   UpdateMessageStatus,
   AddDirectMessage,
   SortConversation,
-  UpdateDirectConversation
+  UpdateDirectConversation,
 } from "../../redux/slices/conversation";
 const StyledInput = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-input": {
@@ -258,48 +258,44 @@ const Footer = () => {
             >
               <IconButton
                 onClick={() => {
-                  {
-                    {
-                      if (value)
-                        socket.emit("text_message", {
+                  if (value) {
+                    socket.emit("text_message", {
+                      message: linkify(value),
+                      conversation_id: room_id,
+                      from: user_id,
+                      to: current_conversation.user_id,
+                      type: containsUrl(value) ? "Link" : "Text",
+                    });
+                    dispatch(
+                      AddDirectMessage({
+                        message: {
+                          type: "msg",
+                          subtype: "Text",
                           message: linkify(value),
-                          conversation_id: room_id,
-                          from: user_id,
-                          to: current_conversation.user_id,
-                          type: containsUrl(value) ? "Link" : "Text",
-                        });
-                      dispatch(
-                        AddDirectMessage({
-                          message: {
-                            type: "msg",
-                            subtype: "Text",
-                            message: linkify(value),
-                            incoming: false,
-                            outgoing: true,
-                          },
-                          conversation_id:room_id,
-                        })
-                      );
-                      dispatch(
-                        SortConversation({
-                          room_id
-                        })
-                      );
-                      dispatch(
-                        UpdateDirectConversation({
-                          conversation: room_id,
-                          msg: {text:value},
-                        })
-                      );
-                      console.log("đã phát đi tin nhắn");
-                      dispatch(
-                        UpdateMessageStatus({
-                          conversation_id: room_id,
-                          type: "Message sent",
-                        })
-                      );
-                      setValue("");
-                    }
+                          incoming: false,
+                          outgoing: true,
+                        },
+                        conversation_id: room_id,
+                      })
+                    );
+                    dispatch(
+                      SortConversation({
+                        room_id,
+                      })
+                    );
+                    dispatch(
+                      UpdateDirectConversation({
+                        conversation: room_id,
+                        msg: { text: value },
+                      })
+                    );
+                    dispatch(
+                      UpdateMessageStatus({
+                        conversation_id: room_id,
+                        type: "Message sent",
+                      })
+                    );
+                    setValue("");
                   }
                 }}
               >

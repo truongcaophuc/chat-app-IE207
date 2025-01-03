@@ -42,6 +42,11 @@ const slice = createSlice({
     updateUser(state, action) {
       state.user = action.payload.user;
     },
+    unFriend(state, action) {
+      console.log("có hủy kết bạn")
+      const user_id = action.payload;
+      state.friends = state.friends.filter((friend) => friend._id != user_id);
+    },
     // Toggle Sidebar
     toggleSideBar(state) {
       state.sideBar.open = !state.sideBar.open;
@@ -87,16 +92,24 @@ const slice = createSlice({
       state.chat_type = "group";
       state.group_id = action.payload.group_id;
     },
+    resetGroup(state, action) {
+      state.group_id = null;
+    },
     updateOutgoingInvitaion(state, action) {
-      const {type,invitation}=action.payload
-      if(type=='add')
-      state.outgoingInvitations.push(action.payload.invitation)
-      else if(type=='remove')
-        state.outgoingInvitations=state.outgoingInvitations.filter(inv=>inv!==invitation)
+      const { type, invitation } = action.payload;
+      if (type == "add")
+        state.outgoingInvitations.push(action.payload.invitation);
+      else if (type == "remove")
+        state.outgoingInvitations = state.outgoingInvitations.filter(
+          (inv) => inv !== invitation
+        );
     },
   },
 });
-
+export const {
+  unFriend,
+  resetGroup
+} = slice.actions;
 // Reducer
 export default slice.reducer;
 
@@ -244,12 +257,12 @@ export function FetchFriendInvitations() {
       )
       .then((response) => {
         console.log(response);
-        const invitations =response.data.data
-        const friend_invitation=invitations.map((inv)=>{
-            return inv.recipient
-        })
+        const invitations = response.data.data;
+        const friend_invitation = invitations.map((inv) => {
+          return inv.recipient;
+        });
         dispatch(
-          slice.actions.updateFriendInvitations({ requests:friend_invitation })
+          slice.actions.updateFriendInvitations({ requests: friend_invitation })
         );
       })
       .catch((err) => {
@@ -313,7 +326,6 @@ export const UpdateUserProfile = (formValues) => {
     const key = v4();
 
     try {
-
     } catch (error) {
       console.log(error);
     }
@@ -338,9 +350,8 @@ export const UpdateUserProfile = (formValues) => {
       });
   };
 };
-export const UpdateOutgoingInvitaion = ({ invitation,type}) => {
+export const UpdateOutgoingInvitaion = ({ invitation, type }) => {
   return async (dispatch, getState) => {
-    dispatch(slice.actions.updateOutgoingInvitaion({invitation,type}));
+    dispatch(slice.actions.updateOutgoingInvitaion({ invitation, type }));
   };
 };
-
