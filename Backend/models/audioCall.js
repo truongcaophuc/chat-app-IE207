@@ -25,7 +25,7 @@ const audioCallSchema = new mongoose.Schema({
   },
   startedAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   endedAt: {
     type: Date,

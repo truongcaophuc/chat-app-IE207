@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useDispatch, useSelector } from "react-redux";
 import { ResetAudioCallQueue } from "../redux/slices/audioCall";
+import { socket } from "../socket";
 // Hàm tạo ID ngẫu nhiên
 function randomID(len) {
   let result = "";
@@ -55,6 +56,7 @@ export default function App() {
       },
       turnOnCameraWhenJoining: false,
       onLeaveRoom: () => {
+        socket.emit("end_audiocall", { roomID });
         dispatch(ResetAudioCallQueue());
         window.location.href = "/app";
       },

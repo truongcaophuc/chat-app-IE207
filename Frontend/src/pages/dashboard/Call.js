@@ -61,7 +61,7 @@ const Call = () => {
               justifyContent="space-between"
               direction="row"
             >
-              <Typography variant="h5">Call Log</Typography>
+              <Typography variant="h5">Lịch sử cuộc gọi</Typography>
             </Stack>
 
             <Stack sx={{ width: "100%" }}>
@@ -70,7 +70,7 @@ const Call = () => {
                   <MagnifyingGlass color="#709CE6" />
                 </SearchIconWrapper>
                 <StyledInputBase
-                  placeholder="Search…"
+                  placeholder="Tìm kiếm"
                   inputProps={{ "aria-label": "search" }}
                 />
               </Search>
@@ -82,19 +82,22 @@ const Call = () => {
               direction={"row"}
             >
               <Typography variant="subtitle2" sx={{}} component={Link}>
-                Start a conversation
+                Gọi thoại
               </Typography>
               <IconButton onClick={handleOpenDialog}>
                 <Phone style={{ color: theme.palette.primary.main }} />
               </IconButton>
             </Stack>
             <Divider />
-            <Stack sx={{ flexGrow: 1, overflow: "scroll", height: "100%" }}>
+            <Stack sx={{ flexGrow: 1, overflow: "scrollY", height: "100%" }}>
               <SimpleBarStyle timeout={500} clickOnTrack={false}>
                 <Stack spacing={2.4}>
-                  {call_logs.map((el, idx) => {
-                    return <CallLogElement key={idx} {...el} />;
-                  })}
+                  {call_logs
+                    ?.slice()
+                    .sort((a, b) => new Date(b.start) - new Date(a.start))
+                    .map((el, idx) => {
+                      return <CallLogElement key={idx} {...el} />;
+                    })}
                 </Stack>
               </SimpleBarStyle>
             </Stack>

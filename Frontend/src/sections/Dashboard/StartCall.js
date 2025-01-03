@@ -48,7 +48,7 @@ const StartCall = ({ open, handleClose }) => {
       aria-describedby="alert-dialog-slide-description"
       sx={{ p: 4 }}
     >
-      <DialogTitle>{"Start New Conversation"}</DialogTitle>
+      <DialogTitle>{"Gọi thoại"}</DialogTitle>
       <Stack p={1} sx={{ width: "100%" }}>
         {/* <Search>
           <SearchIconWrapper>

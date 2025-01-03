@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { faker } from "@faker-js/faker";
-import { AWS_S3_REGION, S3_BUCKET_NAME } from "../../config";
 import { format, isThisYear, isToday, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { socket } from "../../socket";

@@ -217,10 +217,11 @@ exports.getCallLogs = catchAsync(async (req, res, next) => {
       call_logs.push({
         id: elm._id,
         img: other_user.avatar,
-        name: other_user.firstName,
-        online: true,
+        name: other_user.firstName+" "+other_user.lastName,
+        user_id: other_user._id,
         incoming: false,
         missed,
+        start: elm.startedAt
       });
     } else {
       // incoming
@@ -230,40 +231,43 @@ exports.getCallLogs = catchAsync(async (req, res, next) => {
       call_logs.push({
         id: elm._id,
         img: other_user.avatar,
-        name: other_user.firstName,
-        online: true,
-        incoming: false,
+        name: other_user.firstName+" "+other_user.lastName,
+        user_id: other_user._id,
+        incoming: true,
         missed,
+        start: elm.startedAt
       });
     }
   }
 
-  for (let element of video_calls) {
-    const missed = element.verdict !== "Accepted";
-    if (element.from._id.toString() === user_id.toString()) {
-      const other_user = element.to;
+  for (let elm of video_calls) {
+    const missed = elm.verdict !== "Accepted";
+    if (elm.from._id.toString() === user_id.toString()) {
+      const other_user = elm.to;
 
       // outgoing
       call_logs.push({
-        id: element._id,
+        id: elm._id,
         img: other_user.avatar,
-        name: other_user.firstName,
-        online: true,
+        name: other_user.firstName+" "+other_user.lastName,
+        user_id: other_user._id,
         incoming: false,
         missed,
+        start: elm.startedAt
       });
     } else {
       // incoming
-      const other_user = element.from;
+      const other_user = elm.from;
 
       // outgoing
       call_logs.push({
-        id: element._id,
+        id: elm._id,
         img: other_user.avatar,
-        name: other_user.firstName,
-        online: true,
-        incoming: false,
+        name: other_user.firstName+" "+other_user.lastName,
+        user_id: other_user._id,
+        incoming: true,
         missed,
+        start: elm.startedAt
       });
     }
   }

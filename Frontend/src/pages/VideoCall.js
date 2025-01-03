@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useDispatch, useSelector } from "react-redux";
 import { ResetVideoCallQueue } from "../redux/slices/videoCall";
+import { socket } from "../socket";
 // Hàm tạo ID ngẫu nhiên
 function randomID(len) {
   let result = "";
@@ -55,6 +56,7 @@ export default function App() {
       },
       turnOnCameraWhenJoining: true,
       onLeaveRoom: () => {
+        socket.emit("end_videocall",{roomID})
         dispatch(ResetVideoCallQueue());
         window.location.href = "/app";
       },

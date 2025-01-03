@@ -1,12 +1,7 @@
 import React from "react";
-import {
-  Box,
-  Badge,
-  Stack,
-  Avatar,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Box, Badge, Stack, Typography, IconButton } from "@mui/material";
+import { format, isThisYear, isToday, formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
 import { styled, useTheme } from "@mui/material/styles";
 import {
   ArrowDownLeft,
@@ -14,11 +9,36 @@ import {
   VideoCamera,
   Phone,
 } from "phosphor-react";
-import { useDispatch } from "react-redux";
 import { StartAudioCall } from "../redux/slices/audioCall";
 import { StartVideoCall } from "../redux/slices/videoCall";
-import { AWS_S3_REGION, S3_BUCKET_NAME } from "../config";
-
+import Avatar from "react-avatar";
+import { useDispatch, useSelector } from "react-redux";
+const getMessageTime = (timestamp) => {
+  const date = new Date(timestamp);
+  console.log(date)
+  const daysDifference = Math.floor(
+    (new Date() - date) / (1000 * 60 * 60 * 24)
+  );
+  if (daysDifference < 7) {
+    let result = formatDistanceToNow(date, {
+      addSuffix: false,
+      locale: vi,
+    }).replace(/^khoảng /, "");
+    if (result === "dưới 1 phút") {
+      return "Vài giây";
+    }
+    console.log(result)
+    return result;
+  } else {
+    if (isThisYear(date)) {
+      // Nếu cùng năm, hiển thị ngày và tháng
+      return format(date, "dd/MM");
+    } else {
+      // Nếu năm khác, hiển thị ngày, tháng và năm với 2 chữ số cuối
+      return format(date, "dd/MM/yy");
+    }
+  }
+};
 const StyledChatBox = styled(Box)(({ theme }) => ({
   "&:hover": {
     cursor: "pointer",
@@ -54,9 +74,10 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const CallLogElement = ({ img, name, incoming, missed, online, id }) => {
+const CallLogElement = ({ img, name, incoming, missed, user_id,start }) => {
   const theme = useTheme();
-
+  const { conversations } = useSelector((state) => state.conversation.direct_chat);
+  const user=conversations.find((conversation) =>conversation.user_id===user_id)
   return (
     <StyledChatBox
       sx={{
@@ -75,16 +96,30 @@ const CallLogElement = ({ img, name, incoming, missed, online, id }) => {
       >
         <Stack direction="row" spacing={2}>
           {" "}
-          {online ? (
+          {user.online ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`} />
+              <Avatar
+                alt={name}
+                src={""}
+                name={name}
+                size={35}
+                round={true}
+                className="avatar"
+              />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`} />
+            <Avatar
+              alt={name}
+              src={""}
+              name={name}
+              size={35}
+              round={true}
+              className="avatar"
+            />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
@@ -94,7 +129,7 @@ const CallLogElement = ({ img, name, incoming, missed, online, id }) => {
               ) : (
                 <ArrowUpRight color={missed ? "red" : "green"} />
               )}
-              <Typography variant="caption">Yesterday 21:24</Typography>
+              <Typography variant="caption">{getMessageTime(start)}</Typography>
             </Stack>
           </Stack>
         </Stack>
@@ -130,7 +165,14 @@ const CallElement = ({ img, name, id, handleClose }) => {
       >
         <Stack direction="row" spacing={2}>
           {" "}
-          <Avatar alt={name} src={img} />
+          <Avatar
+              alt={name}
+              src={""}
+              name={name}
+              size={35}
+              round={true}
+              className="avatar"
+            />
           <Stack spacing={0.3} alignItems="center" direction={"row"}>
             <Typography variant="subtitle2">{name}</Typography>
           </Stack>
