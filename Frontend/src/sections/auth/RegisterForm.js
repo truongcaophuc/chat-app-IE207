@@ -112,7 +112,7 @@ export default function AuthRegisterForm() {
           },
         }}
       >
-        Create Account
+        Tạo tài khoản
       </LoadingButton>
     </FormProvider>
   );

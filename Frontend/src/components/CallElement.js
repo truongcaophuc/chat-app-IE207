@@ -77,6 +77,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const CallLogElement = ({ img, name, incoming, missed, user_id,start }) => {
   const theme = useTheme();
   const { conversations } = useSelector((state) => state.conversation.direct_chat);
+  console.log("conversation là", conversations)
+  console.log("user", user_id)
   const user=conversations.find((conversation) =>conversation.user_id===user_id)
   return (
     <StyledChatBox
@@ -96,7 +98,7 @@ const CallLogElement = ({ img, name, incoming, missed, user_id,start }) => {
       >
         <Stack direction="row" spacing={2}>
           {" "}
-          {user.online ? (
+          {user?.online ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}

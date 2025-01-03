@@ -12,13 +12,13 @@ export default function Register() {
   return (
     <>
       <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-        <Typography variant="h4">Get started with Tawk.</Typography>
+        <Typography variant="h4">Get started with Tally</Typography>
 
         <Stack direction="row" spacing={0.5}>
-          <Typography variant="body2"> Already have an account? </Typography>
+          <Typography variant="body2"> Đã có tài khoản? </Typography>
 
           <Link component={RouterLink} to={"/auth/login"} variant="subtitle2">
-            Sign in
+            Đăng nhập
           </Link>
         </Stack>
       </Stack>
