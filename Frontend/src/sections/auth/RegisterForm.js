@@ -102,11 +102,11 @@ export default function AuthRegisterForm() {
         variant="contained"
         loading={isLoading}
         sx={{
-          bgcolor: "text.primary",
+          bgcolor: "#147ad9",
           color: (theme) =>
             theme.palette.mode === "light" ? "common.white" : "grey.800",
           "&:hover": {
-            bgcolor: "text.primary",
+            bgcolor: "#3989d4",
             color: (theme) =>
               theme.palette.mode === "light" ? "common.white" : "grey.800",
           },

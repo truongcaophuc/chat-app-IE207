@@ -233,8 +233,25 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
  
   try {
-    const resetURL = `http://localhost:3000/auth/new-password`;
-    mailService.sendEmail();
+    console.log("body là ",req.body)
+    const new_otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      lowerCaseAlphabets: false,
+    });
+  
+    const resetURL = `http://localhost:3000/auth/new-password?token=${new_otp}`;
+    mailService.sendEmail({
+      from: "phuctruong.310103@gmail.com",
+      to: req.body.email,
+      subject: "Verification OTP",
+      attachments: [],
+      html: `
+      <p>Nhấn vào link bên dưới để khôi phục mật khẩu</p>
+      <a href="${resetURL}" target="_blank">Reset Password</a>
+      <p>Nếu bạn không yêu cầu hãy bỏ qua email này</p>
+    `,
+    });
 
     res.status(200).json({
       status: "success",

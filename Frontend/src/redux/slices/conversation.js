@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { format, isThisYear, isToday, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { socket } from "../../socket";
-const user_id = window.localStorage.getItem("user_id");
+
 const getMessageTime = (timestamp) => {
   const date = new Date(timestamp);
   const daysDifference = Math.floor(
@@ -46,6 +46,7 @@ const slice = createSlice({
   initialState,
   reducers: {
     fetchDirectConversations(state, action) {
+      const user_id = window.localStorage.getItem("user_id");
       const sort_message = action.payload.conversations?.sort(
         (a, b) =>
           new Date(b.messages.slice(-1)[0]?.created_at) -
@@ -82,6 +83,7 @@ const slice = createSlice({
       state.direct_chat.conversations = list;
     },
     fetchGroupConversations(state, action) {
+      const user_id = window.localStorage.getItem("user_id");
       const sort_message = action.payload.conversations?.sort(
         (a, b) =>
           new Date(b.messages.slice(-1)[0]?.created_at) -
@@ -146,6 +148,7 @@ const slice = createSlice({
       });
     },
     addDirectConversation(state, action) {
+      const user_id = window.localStorage.getItem("user_id");
       const this_conversation = action.payload.conversation;
       const user = this_conversation.participants.find(
         (elm) => elm._id.toString() !== user_id
@@ -184,6 +187,7 @@ const slice = createSlice({
       state.group_chat.current_conversation = action.payload;
     },
     fetchCurrentMessages(state, action) {
+      const user_id = window.localStorage.getItem("user_id");
       const messages = action.payload.messages;
       const formatted_messages = messages.map((el) => ({
         id: el._id,
@@ -196,6 +200,7 @@ const slice = createSlice({
       state.direct_chat.current_messages = formatted_messages;
     },
     fetchCurrentMessagesGroup(state, action) {
+      const user_id = window.localStorage.getItem("user_id");
       const messages = action.payload.messages;
       const formatted_messages = messages.map((el) => ({
         id: el._id,

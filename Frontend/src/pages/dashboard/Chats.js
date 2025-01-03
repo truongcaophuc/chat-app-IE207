@@ -34,10 +34,10 @@ import {
   FetchUsers,
   FetchFriendInvitations
 } from "../../redux/slices/app";
-const user_id = window.localStorage.getItem("user_id");
 
 const Chats = () => {
   const theme = useTheme();
+  const user_id = window.localStorage.getItem("user_id");
   const [searchText, setSearchText] = useState(""); // State để lưu giá trị tìm kiếm
 
   const { conversations } = useSelector(
@@ -57,6 +57,7 @@ const Chats = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    console.log("user_id là",user_id)
     socket.emit("get_direct_conversations", { user_id }, (data) => {
       console.log("Dữ liệu data là :", data); // this data is the list of conversations
       // dispatch action

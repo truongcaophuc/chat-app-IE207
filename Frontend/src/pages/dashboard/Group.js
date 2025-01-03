@@ -24,8 +24,9 @@ import CreateGroup from "../../sections/dashboard/CreateGroup";
 import { socket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchGroupConversations } from "../../redux/slices/conversation";
-const user_id = window.localStorage.getItem("user_id");
+
 const Group = () => {
+  const user_id = window.localStorage.getItem("user_id");
   const [openDialog, setOpenDialog] = useState(false);
   const [searchText, setSearchText] = useState(""); // State để lưu giá trị tìm kiếm
   const [searchParams] = useSearchParams();
