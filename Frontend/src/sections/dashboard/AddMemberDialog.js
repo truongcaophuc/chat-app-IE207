@@ -25,7 +25,7 @@ const AddMemberDialog = ({ open, handleClose, members, onAdd,users }) => {
 
   const handleAdd = () => {
     const newMembers = selectedMembers.filter(
-        (memberId) => !members.some((member) => member._id === memberId)
+        (memberId) => !members?.some((member) => member._id === memberId)
       );
     onAdd(newMembers);
     setSelectedMembers([]);
@@ -49,10 +49,10 @@ const AddMemberDialog = ({ open, handleClose, members, onAdd,users }) => {
               <ListItemText primary={user.firstName+" "+user.lastName} />
               <Checkbox
                 edge="end"
-                disabled={members.some((member) => member._id === user._id)} 
+                disabled={members?.some((member) => member._id === user._id)} 
                 checked={
                     Boolean(selectedMembers.includes(user._id)) || // Luôn chuyển `checked` thành true/false
-                    members.some((member) => member._id === user._id) // Luôn tích nếu đã là thành viên
+                    members?.some((member) => member._id === user._id) // Luôn tích nếu đã là thành viên
                   }
                 onChange={() => handleToggle(user._id)}
               />
