@@ -109,7 +109,7 @@ const TextMsg = ({ el, menu }) => {
             {el.message}
           </Typography>
         </Box>
-        {is_last_message && new_conversation.isSeen && el.outgoing && (
+        {is_last_message && new_conversation?.isSeen && el.outgoing && (
           <Avatar src={``} round size="15" name={current_conversation.name} />
         )}
       </Stack>

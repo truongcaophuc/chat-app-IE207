@@ -176,7 +176,7 @@ exports.startVideoCall = catchAsync(async (req, res, next) => {
   const from_user = await User.findById(from);
   const to_user = await User.findById(to);
 
-  // create a new call videoCall Doc and send required data to client
+  // create a new call videoCall Doc and send required data to clien
   const new_video_call = await VideoCall.create({
     participants: [from, to],
     from,
