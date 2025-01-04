@@ -95,9 +95,9 @@ const ChatHeader = () => {
       onClick: () => {
         socket.emit("unFriend", {
           from: user_id,
-          to: current_conversation.user_id,
+          to: current_conversation?.user_id,
         });
-        dispatch(unFriend(current_conversation.user_id));
+        dispatch(unFriend(current_conversation?.user_id));
       },
     },
   ];
@@ -179,7 +179,7 @@ const ChatHeader = () => {
           >
             <IconButton
               onClick={() => {
-                dispatch(StartVideoCall(current_conversation.user_id));
+                dispatch(StartVideoCall(current_conversation?.user_id));
                 //navigate("/call?type=video")
               }}
             >
@@ -187,7 +187,7 @@ const ChatHeader = () => {
             </IconButton>
             <IconButton
               onClick={() => {
-                dispatch(StartAudioCall(current_conversation.user_id));
+                dispatch(StartAudioCall(current_conversation?.user_id));
                 //navigate("/call?type=audio")
               }}
             >

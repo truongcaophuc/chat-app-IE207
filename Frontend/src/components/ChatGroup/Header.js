@@ -90,12 +90,12 @@ const ChatHeader = () => {
     console.log("Thành viên được thêm:", selectedMembers);
     // Gửi thông tin thành viên được chọn lên server
     socket.emit("addMember", {
-      id: current_conversation.id,
+      id: current_conversation?.id,
       members: selectedMembers,
     });
     dispatch(
       addMember({
-        id: current_conversation.id,
+        id: current_conversation?.id,
         members: selectedMembers,
       })
     );
@@ -110,10 +110,10 @@ const ChatHeader = () => {
       onClick: () => {
         socket.emit("leaveGroup", {
           user_id,
-          id: current_conversation.id,
+          id: current_conversation?.id,
         });
         dispatch(resetGroup());
-        dispatch(leaveGroup(current_conversation.id));
+        dispatch(leaveGroup(current_conversation?.id));
       },
     },
   ];
@@ -122,7 +122,7 @@ const ChatHeader = () => {
       <AddMemberDialog
         open={openAddMemberDialog}
         handleClose={handleCloseAddMemberDialog}
-        members={current_conversation.users}
+        members={current_conversation?.users}
         onAdd={handleAddMembers}
         users={all_users}
       />
@@ -202,14 +202,14 @@ const ChatHeader = () => {
           >
             <IconButton
               onClick={() => {
-                dispatch(StartVideoCall(current_conversation.user_id));
+                dispatch(StartVideoCall(current_conversation?.user_id));
               }}
             >
               <VideoCamera />
             </IconButton>
             <IconButton
               onClick={() => {
-                dispatch(StartAudioCall(current_conversation.user_id));
+                dispatch(StartAudioCall(current_conversation?.user_id));
               }}
             >
               <Phone />
