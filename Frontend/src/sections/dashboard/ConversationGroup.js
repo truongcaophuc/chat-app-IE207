@@ -55,7 +55,7 @@ const MessageOption = () => {
   );
 };
 
-const TextMsg = ({ el, menu }) => {
+const TextMsg = ({ el, menu,index,messageRefs }) => {
   const theme = useTheme();
   const { current_conversation, conversations } = useSelector(
     (state) => state.conversation.group_chat
@@ -102,6 +102,7 @@ const TextMsg = ({ el, menu }) => {
           <Typography
             variant="body2"
             color={el.incoming ? theme.palette.text : "#fff"}
+            ref={(el) => (messageRefs.current[index] = el)}
           >
             {el.message}
           </Typography>

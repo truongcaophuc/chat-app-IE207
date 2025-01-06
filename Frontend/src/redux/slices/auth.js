@@ -60,18 +60,19 @@ export function NewPassword(formValues) {
       )
       .then(function (response) {
         console.log(response);
-        dispatch(
-            slice.actions.logIn({
-              isLoggedIn: true,
-              token: response.data.token,
-            })
-          );
+        // dispatch(
+        //     slice.actions.logIn({
+        //       isLoggedIn: true,
+        //       token: response.data.token,
+        //     })
+        //   );
         dispatch(
           showSnackbar({ severity: "success", message: response.data.message })
         );
         dispatch(
           slice.actions.updateIsLoading({ isLoading: false, error: false })
         );
+        window.location.href="/auth/login"
       })
       .catch(function (error) {
         console.log(error);
@@ -121,8 +122,6 @@ export function ForgotPassword(formValues) {
 
 export function LoginUser(formValues) {
   return async (dispatch, getState) => {
-    // Make API call here
-    console.log("login")
     dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
 
     await axios
@@ -146,7 +145,6 @@ export function LoginUser(formValues) {
             user_id: response.data.user_id,
           })
         );
-        console.log("đã login xong",response.data.user_id)
         window.localStorage.setItem("user_id", response.data.user_id);
         dispatch(
           showSnackbar({ severity: "success", message: response.data.message })

@@ -55,7 +55,7 @@ const MessageOption = () => {
   );
 };
 
-const TextMsg = ({ el, menu }) => {
+const TextMsg = ({ el, menu,messageRefs,index }) => {
   const theme = useTheme();
   const { current_conversation, conversations } = useSelector(
     (state) => state.conversation.direct_chat
@@ -105,6 +105,7 @@ const TextMsg = ({ el, menu }) => {
           <Typography
             variant="body2"
             color={el.incoming ? theme.palette.text : "#fff"}
+            ref={(el) => (messageRefs.current[index] = el)}
           >
             {el.message}
           </Typography>

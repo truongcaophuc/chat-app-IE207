@@ -53,7 +53,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const ChatHeader = () => {
+const ChatHeader = ({setShowSearchBar}) => {
   const dispatch = useDispatch();
   const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const isMobile = useResponsive("between", "md", "xs", "sm");
@@ -200,22 +200,8 @@ const ChatHeader = () => {
             alignItems="center"
             spacing={isMobile ? 1 : 3}
           >
-            <IconButton
-              onClick={() => {
-                dispatch(StartVideoCall(current_conversation?.user_id));
-              }}
-            >
-              <VideoCamera />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                dispatch(StartAudioCall(current_conversation?.user_id));
-              }}
-            >
-              <Phone />
-            </IconButton>
             {!isMobile && (
-              <IconButton>
+              <IconButton onClick={()=>{setShowSearchBar(true)}}>
                 <MagnifyingGlass />
               </IconButton>
             )}

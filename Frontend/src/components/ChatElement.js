@@ -67,8 +67,6 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
   return (
     <StyledChatBox
       onClick={() => {
-        console.log("đã chọn");
-        console.log(id);
         dispatch(SelectConversation({ room_id: id }));
         if (conversation.unread != 0) {
           console.log("Ta đã phát sự kiện")

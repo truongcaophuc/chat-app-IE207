@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { useTheme } from "@mui/material/styles";
 import { Box, Stack, Typography } from "@mui/material";
 
 import { Link, useSearchParams } from "react-router-dom";
 import ChatComponent from "./Conversation";
 import Chats from "./Chats";
+import SearchConversation from "./SearchConversation";
 import Contact from "../../sections/dashboard/Contact";
 import NoChat from "../../assets/Illustration/NoChat";
 import { useSelector } from "react-redux";
@@ -13,9 +14,9 @@ import Media from "../../sections/dashboard/SharedMessages";
 
 const GeneralApp = () => {
   const [searchParams] = useSearchParams();
-
+  const messageRefs = useRef([]);
   const theme = useTheme();
-
+  const [showSearchBar, setShowSearchBar] = useState(false);
   const { sideBar, room_id, chat_type } = useSelector((state) => state.app);
 
   return (
@@ -25,9 +26,9 @@ const GeneralApp = () => {
         <Box
           sx={{
             height: "100%",
-            width: sideBar.open
-              ? `calc(100vw - 740px )`
-              : "calc(100vw - 420px )",
+            // width: sideBar.open
+            //   ? `calc(100vw - 740px )`
+            //   : "calc(100vw - 420px )",
             backgroundColor:
               theme.palette.mode === "light"
                 ? "#FFF"
@@ -38,10 +39,10 @@ const GeneralApp = () => {
                 ? "0px"
                 : "6px solid #0162C4",
           }}
+          style={{ flex: 1 }}
         >
-          {
-          room_id !== null ? (
-            <ChatComponent />
+          {room_id !== null ? (
+            <ChatComponent messageRefs={messageRefs} setShowSearchBar={setShowSearchBar}/>
           ) : (
             <Stack
               spacing={2}
@@ -65,6 +66,7 @@ const GeneralApp = () => {
             </Stack>
           )}
         </Box>
+        {showSearchBar && <SearchConversation messageRefs={messageRefs} setShowSearchBar={setShowSearchBar}/>}
         {sideBar.open &&
           (() => {
             switch (sideBar.type) {

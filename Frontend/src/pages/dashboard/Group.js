@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
@@ -24,8 +24,10 @@ import CreateGroup from "../../sections/dashboard/CreateGroup";
 import { socket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchGroupConversations } from "../../redux/slices/conversation";
-
+import SearchGroup from "./SearchGroup";
 const Group = () => {
+    const messageRefs = useRef([]);
+     const [showSearchBar, setShowSearchBar] = useState(false);
   const user_id = window.localStorage.getItem("user_id");
   const [openDialog, setOpenDialog] = useState(false);
   const [searchText, setSearchText] = useState(""); // State để lưu giá trị tìm kiếm
@@ -152,9 +154,9 @@ const Group = () => {
         <Box
           sx={{
             height: "100%",
-            width: sideBar.open
-              ? `calc(100vw - 740px )`
-              : "calc(100vw - 420px )",
+            // width: sideBar.open
+            //   ? `calc(100vw - 740px )`
+            //   : "calc(100vw - 420px )",
             backgroundColor:
               theme.palette.mode === "light"
                 ? "#FFF"
@@ -165,9 +167,10 @@ const Group = () => {
                 ? "0px"
                 : "6px solid #0162C4",
           }}
+          style={{ flex: 1 }}
         >
           { group_id !== null ? (
-            <ChatComponent />
+            <ChatComponent messageRefs={messageRefs} setShowSearchBar={setShowSearchBar}/>
           ) : (
             <Stack
               spacing={2}
@@ -191,6 +194,7 @@ const Group = () => {
             </Stack>
           )}
         </Box>
+        {showSearchBar && <SearchGroup messageRefs={messageRefs} setShowSearchBar={setShowSearchBar}/>}
       </Stack>
       {openDialog && (
         <CreateGroup open={openDialog} handleClose={handleCloseDialog} />

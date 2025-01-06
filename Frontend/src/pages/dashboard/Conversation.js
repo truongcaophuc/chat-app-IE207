@@ -21,7 +21,7 @@ import {
 } from "../../redux/slices/conversation";
 import { socket } from "../../socket";
 
-const Conversation = ({ isMobile, menu }) => {
+const Conversation = ({ isMobile, menu,messageRefs }) => {
   const dispatch = useDispatch();
 
   const { conversations, current_messages, current_conversation } = useSelector(
@@ -44,12 +44,12 @@ const Conversation = ({ isMobile, menu }) => {
     current_conversation && (
       <Box p={isMobile ? 1 : 3}>
         <Stack spacing={3}>
-          {current_messages.map((el, idx) => {
+          {current_messages.map((el, index) => {
             switch (el.type) {
               case "divider":
                 return (
                   // Timeline
-                  <Timeline el={el} />
+                  <Timeline el={el} index={index} messageRefs={messageRefs}/>
                 );
 
               case "msg":
@@ -57,30 +57,30 @@ const Conversation = ({ isMobile, menu }) => {
                   case "img":
                     return (
                       // Media Message
-                      <MediaMsg el={el} menu={menu} />
+                      <MediaMsg el={el} menu={menu} index={index}  messageRefs={messageRefs}/>
                     );
 
                   case "doc":
                     return (
                       // Doc Message
-                      <DocMsg el={el} menu={menu} />
+                      <DocMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
                   case "Link":
                     return (
                       //  Link Message
-                      <LinkMsg el={el} menu={menu} />
+                      <LinkMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
 
                   case "reply":
                     return (
                       //  ReplyMessage
-                      <ReplyMsg el={el} menu={menu} />
+                      <ReplyMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
 
                   default:
                     return (
                       // Text Message
-                      <TextMsg el={el} menu={menu} />
+                      <TextMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
                 }
 
@@ -94,7 +94,7 @@ const Conversation = ({ isMobile, menu }) => {
   );
 };
 
-const ChatComponent = () => {
+const ChatComponent = ({messageRefs,setShowSearchBar}) => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
 
@@ -116,7 +116,7 @@ const ChatComponent = () => {
       width={isMobile ? "100vw" : "auto"}
     >
       {/*  */}
-      <ChatHeader />
+      <ChatHeader setShowSearchBar={setShowSearchBar}/>
       <Box
         ref={messageListRef}
         width={"100%"}
@@ -134,7 +134,7 @@ const ChatComponent = () => {
         }}
       >
         <SimpleBarStyle timeout={500} clickOnTrack={false}>
-          <Conversation menu={true} isMobile={isMobile} />
+          <Conversation menu={true} isMobile={isMobile} messageRefs={messageRefs}/>
         </SimpleBarStyle>
       </Box>
 

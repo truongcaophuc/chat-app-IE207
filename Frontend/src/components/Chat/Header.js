@@ -53,7 +53,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 
 
-const ChatHeader = () => {
+const ChatHeader = ({setShowSearchBar}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isMobile = useResponsive("between", "md", "xs", "sm");
@@ -194,7 +194,7 @@ const ChatHeader = () => {
               <Phone />
             </IconButton>
             {!isMobile && (
-              <IconButton>
+              <IconButton onClick={()=>{setShowSearchBar(true)}}>
                 <MagnifyingGlass />
               </IconButton>
             )}

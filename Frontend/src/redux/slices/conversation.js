@@ -118,16 +118,14 @@ const slice = createSlice({
       const this_conversation_id = conversation || room_id;
       state.direct_chat.conversations.forEach((conversation) => {
         if (conversation.id === this_conversation_id) {
-          console.log("có so sánh");
           if (conversation) {
             conversation.time = `Vài giây`;
           }
           if (msg) conversation.msg = msg.text;
           if (room_id && this_conversation_id === room_id) {
-            console.log("cập nhật về 0");
             conversation.unread = 0;
           } else conversation.unread += 1;
-        } else console.log("khong co ai bang");
+        }
       });
     },
     updateGroupConversation(state, action) {
@@ -135,16 +133,14 @@ const slice = createSlice({
       const this_conversation_id = conversation || group_id;
       state.group_chat.conversations.forEach((conversation) => {
         if (conversation.id === this_conversation_id) {
-          console.log("có so sánh");
           if (conversation) {
             conversation.time = `Vài giây`;
           }
           if (msg) conversation.msg = msg.text;
           if (group_id && this_conversation_id === group_id) {
-            console.log("cập nhật về 0");
             conversation.unread = 0;
           } else conversation.unread += 1;
-        } else console.log("khong co ai bang");
+        } 
       });
     },
     addDirectConversation(state, action) {
@@ -167,8 +163,6 @@ const slice = createSlice({
     },
     addGroupConversation(state, action) {
       const this_conversation = action.payload.group;
-      console.log("nhóm mới", this_conversation);
-
       state.group_chat.conversations.push({
         id: this_conversation._id,
         users: this_conversation.participants,
@@ -214,11 +208,9 @@ const slice = createSlice({
       state.group_chat.current_messages = formatted_messages;
     },
     addDirectMessage(state, action) {
-      console.log("Tôi đang cập nhạt tin nhắn vào cuộc hội thoại");
       state.direct_chat.current_messages.push(action.payload.message);
     },
     addGroupMessage(state, action) {
-      console.log("Tôi đang cập nhạt tin nhắn vào cuộc hội thoại");
       state.group_chat.current_messages.push(action.payload.message);
     },
     updateUserStatus(state, action) {
@@ -228,8 +220,6 @@ const slice = createSlice({
       });
     },
     updateMessageStatus(state, action) {
-      console.log("tôi vàoo rồi");
-      console.log(action.payload.conversation_id);
       const { type, conversation_id } = action.payload;
       state.direct_chat.conversations.forEach((conversation) => {
         if (conversation.id === conversation_id) {
@@ -243,8 +233,6 @@ const slice = createSlice({
       });
     },
     updateMessageGroupStatus(state, action) {
-      console.log("tôi vàoo rồi");
-      console.log(action.payload.conversation_id);
       const { type, conversation_id } = action.payload;
       state.group_chat.conversations.forEach((conversation) => {
         if (conversation.id === conversation_id) {
@@ -259,7 +247,6 @@ const slice = createSlice({
     },
     sortConversation(state, action) {
       const { room_id, conversations } = action.payload;
-      console.log(room_id, conversations);
       const sorted_conversation = [
         ...conversations.filter((conversation) => conversation.id === room_id),
         ...conversations.filter((conversation) => conversation.id !== room_id),
@@ -268,7 +255,6 @@ const slice = createSlice({
     },
     sortConversationGroup(state, action) {
       const { room_id, conversations } = action.payload;
-      console.log(room_id, conversations);
       const sorted_conversation = [
         ...conversations.filter((conversation) => conversation.id === room_id),
         ...conversations.filter((conversation) => conversation.id !== room_id),
@@ -308,7 +294,6 @@ export const FetchGroupConversations = ({ conversations }) => {
   };
 };
 export const AddDirectConversation = ({ conversation }) => {
-  console.log("cuộc trò chuyện mới", conversation);
   return async (dispatch, getState) => {
     const conversations = getState().conversation.direct_chat.conversations;
     const existing_conversation = conversations.find(
@@ -358,7 +343,6 @@ export const FetchCurrentMessagesGroup = ({ messages }) => {
 export const AddDirectMessage = ({ message, conversation_id }) => {
   return async (dispatch, getState) => {
     if (conversation_id === getState().app.room_id) {
-      console.log("đang thêm tin nhắn");
       socket.emit("message_seen", {
         conversation_id,
         from: getState().conversation.direct_chat.current_conversation.user_id,
@@ -385,7 +369,6 @@ export const UpdateUserStatus = (user) => {
 };
 export const SortConversation = ({ room_id }) => {
   return async (dispatch, getState) => {
-    console.log("đã sắp xếp");
     dispatch(
       slice.actions.sortConversation({
         conversations: getState().conversation.direct_chat.conversations,
@@ -396,7 +379,6 @@ export const SortConversation = ({ room_id }) => {
 };
 export const SortConversationGroup = ({ room_id }) => {
   return async (dispatch, getState) => {
-    console.log("đã sắp xếp");
     dispatch(
       slice.actions.sortConversationGroup({
         conversations: getState().conversation.group_chat.conversations,

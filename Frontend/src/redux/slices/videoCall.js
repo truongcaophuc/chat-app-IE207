@@ -19,13 +19,11 @@ const slice = createSlice({
       if (state.call_queue.length === 0) {
         state.call_queue.push(action.payload.call);
         if (action.payload.incoming) {
-          console.log("tao đã nhận tin nhắn")
           state.open_video_notification_dialog = true; // this will open up the call dialog
           state.incoming = true;
         }
         else {
           state.open_video_dialog = true;
-          console.log("tao vừa mới gọi")
           state.incoming = false;
         }
       } else {
@@ -90,7 +88,6 @@ export const StartVideoCall = (id) => {
 export const PushToVideoCallQueue = (call) => {
   return async (dispatch, getState) => {
     dispatch(slice.actions.pushToVideoCallQueue({call, incoming: true}));
-    console.log("ta đến đây")
   };
 };
 

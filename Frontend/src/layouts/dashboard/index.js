@@ -40,7 +40,6 @@ import {
 } from "../../redux/slices/videoCall";
 
 const DashboardLayout = () => {
-  console.log("bị re render ")
   const isDesktop = useResponsive("up", "md");
   const dispatch = useDispatch();
   const { user_id } = useSelector((state) => state.auth);

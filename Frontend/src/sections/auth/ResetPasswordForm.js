@@ -58,7 +58,7 @@ export default function AuthResetPasswordForm() {
           },
         }}
       >
-        Gửi mã khôi phục
+        Gửi email khôi phục
       </LoadingButton>
     </FormProvider>
   );
