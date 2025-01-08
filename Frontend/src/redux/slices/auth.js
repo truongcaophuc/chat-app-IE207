@@ -163,6 +163,49 @@ export function LoginUser(formValues) {
   };
 }
 
+export function LoginUserByGoogle(user) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.updateIsLoading({ isLoading: true, error: false }));
+
+    await axios
+      .post(
+        "/auth/loginGoogle",
+        {
+          ...user,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then(function (response) {
+        console.log(response);
+        dispatch(
+          slice.actions.logIn({
+            isLoggedIn: true,
+            token: response.data.token,
+            user_id: response.data.user_id,
+          })
+        );
+        window.localStorage.setItem("user_id", response.data.user_id);
+        dispatch(
+          showSnackbar({ severity: "success", message: response.data.message })
+        );
+        dispatch(
+          slice.actions.updateIsLoading({ isLoading: false, error: false })
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+        dispatch(showSnackbar({ severity: "error", message: error.message }));
+        dispatch(
+          slice.actions.updateIsLoading({ isLoading: false, error: true })
+        );
+      });
+  };
+}
+
 export function LogoutUser() {
   return async (dispatch, getState) => {
     window.localStorage.removeItem("user_id");

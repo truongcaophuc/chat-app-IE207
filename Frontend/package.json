@@ -21,6 +21,7 @@
     "axios": "^1.2.6",
     "date-fns": "^4.1.0",
     "emoji-mart": "^5.2.2",
+    "firebase": "^11.1.0",
     "framer-motion": "^7.5.3",
     "phosphor-react": "^1.4.1",
     "prop-types": "^15.8.1",

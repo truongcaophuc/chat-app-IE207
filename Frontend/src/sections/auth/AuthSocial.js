@@ -1,14 +1,27 @@
 // @mui
 import { Divider, IconButton, Stack } from '@mui/material';
 import { GithubLogo, GoogleLogo, TwitterLogo } from 'phosphor-react';
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../../firebaseConfig";
+import { useDispatch } from 'react-redux';
+import { LoginUserByGoogle } from '../../redux/slices/auth';
 
 // ----------------------------------------------------------------------
 
 export default function AuthSocial() {
-
+  const dispatch = useDispatch();
 
   const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("User Info:", user);
 
+      // Lưu thông tin người dùng (tuỳ chọn)
+      dispatch(LoginUserByGoogle(user));
+    } catch (error) {
+      console.error("Error during Google Login:", error);
+    }
   };
 
   const handleGithubLogin = async () => {

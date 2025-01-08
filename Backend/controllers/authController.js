@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const mailService = require("../services/mailer");
 const crypto = require("crypto");
+// const { OAuth2Client } = require("google-auth-library");
+// const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const filterObj = require("../utils/filterObj");
 
@@ -183,6 +185,54 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
     user_id: user._id,
   });
+});
+
+exports.loginGoogle = catchAsync(async (req, res, next) => {
+  const { email, displayName, accessToken  } = req.body;
+  console.log("test::::",email, displayName);
+  if (!email || !displayName) {
+    return res.status(400).json({ error: "Email và displayName là bắt buộc!" });
+  }
+  // if (!accessToken) {
+  //   return res.status(400).json({ error: "AccessToken là bắt buộc!" });
+  // }
+  const [lastName, firstName] = displayName.split(" ");
+  console.log(lastName, firstName);
+  try {
+    // const ticket = await client.verifyIdToken({
+    //   idToken: accessToken, // Nếu đây là ID Token (thường dùng cho web), bạn đặt accessToken tại đây
+    //   audience: process.env.GOOGLE_CLIENT_ID, // Google Client ID của bạn
+    // });
+    // const payload = ticket.getPayload(); // Lấy thông tin user từ Google
+    // console.log("Payload từ Google:", payload);
+    // const { email: verifiedEmail, name } = payload;
+    
+    // Kiểm tra user đã tồn tại trong DB chưa
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Nếu chưa, tạo user mới
+      user = new User({
+        email,
+        firstName,
+        lastName,
+        createdAt: new Date(),
+      });
+      await user.save();
+    }
+
+    const token = signToken(user._id);
+
+    // Trả về thông tin user hoặc JWT token
+    res.status(200).json({
+      status: "success",
+      message: "Logged google in successfully!",
+      token,
+      user_id: user._id,
+    });
+  } catch (error) {
+    console.error("Error in Google login:", error);
+    res.status(500).json({ error: "Lỗi server" });
+  }
 });
 
 // Protect
