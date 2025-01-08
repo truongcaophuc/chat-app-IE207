@@ -1,5 +1,7 @@
 # Node modules
 node_modules/
+firebaseAdmin.js
+config/
 
 # Logs
 *.log
@@ -22,3 +24,5 @@ build/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+
