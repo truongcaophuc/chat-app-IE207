@@ -54,16 +54,10 @@ const Conversation = ({ isMobile, menu,messageRefs }) => {
 
               case "msg":
                 switch (el.subtype) {
-                  case "img":
-                    return (
-                      // Media Message
-                      <MediaMsg el={el} menu={menu} index={index}  messageRefs={messageRefs}/>
-                    );
-
-                  case "doc":
+                  case "Text":
                     return (
                       // Doc Message
-                      <DocMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
+                      <TextMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
                   case "Link":
                     return (
@@ -80,7 +74,7 @@ const Conversation = ({ isMobile, menu,messageRefs }) => {
                   default:
                     return (
                       // Text Message
-                      <TextMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
+                      <MediaMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
                     );
                 }
 

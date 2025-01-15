@@ -114,8 +114,6 @@ const DashboardLayout = () => {
       });
       socket.on("new_message", (data) => {
         const { message, conversation_id } = data;
-        console.log('nhận rồi đừng gửi nữa')
-        console.log("nhận được tin nhắn");
         console.log(data);
 
         console.log(current_conversation);
@@ -138,6 +136,9 @@ const DashboardLayout = () => {
               type: "msg",
               subtype: message.type,
               message: message.text,
+              fileName:message.fileName,
+              fileSize:message.fileSize,
+              fileUrl: message.fileUrl,
               incoming: message.to === user_id,
               outgoing: message.from === user_id,
             },

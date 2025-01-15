@@ -118,7 +118,7 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
               variant="caption"
               sx={{ color: unread ? "black" : "#878787" }}
             >
-              {truncateText(msg, 20)}
+              {truncateText(msg, 15)}
             </Typography>
           </Stack>
         </Stack>

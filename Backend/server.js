@@ -22,7 +22,13 @@ const OneToOneMessage = require("./models/OneToOneMessage");
 const GroupConversation = require("./models/GroupConversation");
 const AudioCall = require("./models/audioCall");
 const VideoCall = require("./models/videoCall");
+const cloudinary = require('cloudinary').v2;
 
+cloudinary.config({
+  cloud_name: 'dv0enj2px',
+  api_key: '118223624632426',
+  api_secret: '25QTrzie0WOKdsMxrvwy2gJRWjE'
+});
 // Add this
 // Create an io server and allow for CORS from http://localhost:3000 with GET and POST methods
 const io = new Server(server, {
@@ -318,7 +324,6 @@ io.on("connection", async (socket) => {
     const { message, conversation_id, from, to, type } = data;
 
     const to_user = await User.findById(to);
-    const from_user = await User.findById(from);
 
     // message => {to, from, type, created_at, text, file}
 
@@ -342,27 +347,52 @@ io.on("connection", async (socket) => {
       conversation_id,
       message: new_message,
     });
-
-    // emit outgoing_message -> from user
-    // io.to(from_user?.socket_id).emit("new_message", {
-    //   conversation_id,
-    //   message: new_message,
-    // });
   });
 
   // handle Media/Document Message
-  socket.on("file_message", (data) => {
-    console.log("Received message:", data);
-
+  socket.on("file_message",async (data) => {
+    const {conversation_id,from,to,file}=data
+    const to_user = await User.findById(to);
+    try {
+      const result = await cloudinary.uploader.upload(file.data, {
+        folder: file.type,
+        resource_type: 'auto', // Cloudinary sẽ tự động nhận diện loại file
+      });
+  
+      console.log('Upload successful:', result);
+      const new_message = {
+        to: to,
+        from: from,
+        type: file.type,
+        created_at: Date.now(),
+        fileName: file.name,
+        fileSize:file.size,
+        fileUrl: result.secure_url, // URL của file đã được upload
+      };
+  
+      // fetch OneToOneMessage Doc & push a new message to existing conversation
+      const chat = await OneToOneMessage.findById(conversation_id);
+      chat.messages.push(new_message);
+      // save to db`
+      await chat.save({ new: true, validateModifiedOnly: true });
+      socket.to(to_user?.socket_id).emit("new_message", {
+        conversation_id,
+        message: new_message,
+      });
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      throw error;
+    }
+  //console.log(data.file.name)
     // data: {to, from, text, file}
 
     // Get the file extension
-    const fileExtension = path.extname(data.file.name);
+   // const fileExtension = path.extname(data.file.name);
 
     // Generate a unique filename
-    const filename = `${Date.now()}_${Math.floor(
-      Math.random() * 10000
-    )}${fileExtension}`;
+    // const filename = `${Date.now()}_${Math.floor(
+    //   Math.random() * 10000
+    // )}${fileExtension}`;
 
     // upload file to AWS s3
 

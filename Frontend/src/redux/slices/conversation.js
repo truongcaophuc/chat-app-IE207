@@ -71,7 +71,7 @@ const slice = createSlice({
           name: `${user?.firstName} ${user?.lastName}`,
           online: user?.status === "Online",
           img: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
-          msg: el.messages.slice(-1)[0]?.text || "",
+          msg: el.messages.slice(-1)[0]?.text ||el.messages.slice(-1)[0]?.fileName|| "",
           time: time,
           unread: unread_message_count,
           pinned: false,
@@ -121,7 +121,8 @@ const slice = createSlice({
           if (conversation) {
             conversation.time = `Vài giây`;
           }
-          if (msg) conversation.msg = msg.text;
+          if (msg)
+            conversation.msg = msg.text;
           if (room_id && this_conversation_id === room_id) {
             conversation.unread = 0;
           } else conversation.unread += 1;
@@ -140,7 +141,7 @@ const slice = createSlice({
           if (group_id && this_conversation_id === group_id) {
             conversation.unread = 0;
           } else conversation.unread += 1;
-        } 
+        }
       });
     },
     addDirectConversation(state, action) {
@@ -183,14 +184,27 @@ const slice = createSlice({
     fetchCurrentMessages(state, action) {
       const user_id = window.localStorage.getItem("user_id");
       const messages = action.payload.messages;
-      const formatted_messages = messages.map((el) => ({
-        id: el._id,
-        type: "msg",
-        subtype: el.type,
-        message: el.text,
-        incoming: el.to === user_id,
-        outgoing: el.from === user_id,
-      }));
+      const formatted_messages = messages.map((el) => {
+        if(el.type==="Text")
+        return {
+          id: el._id,
+          type: "msg",
+          subtype: el.type,
+          message: el.text,
+          incoming: el.to === user_id,
+          outgoing: el.from === user_id,
+        };
+        else return {
+          id: el._id,
+          type: "msg",
+          subtype: el.type,
+          fileName: el.fileName,
+          fileSize:el.fileSize,
+          fileUrl: el.fileUrl,
+          incoming: el.to === user_id,
+          outgoing: el.from === user_id,
+        }
+      });
       state.direct_chat.current_messages = formatted_messages;
     },
     fetchCurrentMessagesGroup(state, action) {

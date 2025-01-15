@@ -19,7 +19,7 @@ const oneToOneMessageSchema = new mongoose.Schema({
       },
       type: {
         type: String,
-        enum: ["Text", "Media", "Document", "Link"],
+        // enum: ["Text", "File", "Link"],
       },
       created_at: {
         type: Date,
@@ -28,7 +28,13 @@ const oneToOneMessageSchema = new mongoose.Schema({
       text: {
         type: String,
       },
-      file: {
+      fileUrl: {
+        type: String,
+      },
+      fileName: {
+        type: String,
+      },
+      fileSize: {
         type: String,
       },
       is_read: {

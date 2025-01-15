@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Stack,
   Box,
@@ -7,14 +7,19 @@ import {
   MenuItem,
   IconButton,
   Divider,
+  Modal,
 } from "@mui/material";
 import Avatar from "react-avatar";
 import { useTheme, alpha } from "@mui/material/styles";
-import { DotsThreeVertical, DownloadSimple, Image } from "phosphor-react";
+import {
+  DotsThreeVertical,
+  DownloadSimple,
+  Image,
+  Folder,
+  FileVideo,
+} from "phosphor-react";
 import { Message_options } from "../../data";
 import { Link } from "react-router-dom";
-import truncateString from "../../utils/truncate";
-import { LinkPreview } from "@dhaiwat10/react-link-preview";
 import { SocialMediaEmbed } from "react-social-media-embed";
 import { useDispatch, useSelector } from "react-redux";
 const MessageOption = () => {
@@ -54,15 +59,21 @@ const MessageOption = () => {
     </>
   );
 };
-
-const TextMsg = ({ el, menu,messageRefs,index }) => {
+const formatFileSize = (size) => {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let unitIndex = 0;
+  while (size > 1024 && unitIndex < units.length) {
+    size /= 1024;
+    unitIndex++;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+};
+const TextMsg = ({ el, menu, messageRefs, index }) => {
   const theme = useTheme();
   const { current_conversation, conversations } = useSelector(
     (state) => state.conversation.direct_chat
   );
-  const { chat_type } = useSelector(
-    (state) => state.app
-  );
+  const { chat_type } = useSelector((state) => state.app);
   const { current_messages } = useSelector(
     (state) => state.conversation.direct_chat
   );
@@ -79,7 +90,7 @@ const TextMsg = ({ el, menu,messageRefs,index }) => {
       justifyContent={el.incoming ? "start" : "end"}
       alignItems={"center"}
       sx={{ paddingLeft: "35px" }}
-      style={{position:"relative"}}
+      style={{ position: "relative" }}
     >
       {el.incoming && el.incoming != prev_message?.incoming && (
         <Avatar
@@ -87,7 +98,7 @@ const TextMsg = ({ el, menu,messageRefs,index }) => {
           round
           size="30"
           name={current_conversation.name}
-          style={{position:"absolute",left:"0px"}}
+          style={{ position: "absolute", left: "0px" }}
         />
       )}
       <Stack direction="column" alignItems={"end"} spacing={1}>
@@ -119,9 +130,53 @@ const TextMsg = ({ el, menu,messageRefs,index }) => {
   );
 };
 const MediaMsg = ({ el, menu }) => {
+  const [open, setOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const theme = useTheme();
+  const handleOpen = (image) => {
+    setSelectedImage(image);
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+  const downloadFile = () => {
+    fetch(el.fileUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/pdf",
+      },
+    })
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = el.fileName;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.parentNode.removeChild(link);
+      });
+  };
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    p: 4,
+  };
   return (
     <Stack direction="row" justifyContent={el.incoming ? "start" : "end"}>
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <img src={selectedImage} alt="Preview" style={{ width: "100%" }} />
+        </Box>
+      </Modal>
       <Box
         px={1.5}
         py={1.5}
@@ -134,17 +189,48 @@ const MediaMsg = ({ el, menu }) => {
         }}
       >
         <Stack spacing={1}>
-          <img
-            src={el.img}
-            alt={el.message}
-            style={{ maxHeight: 210, borderRadius: "10px" }}
-          />
-          <Typography
-            variant="body2"
-            color={el.incoming ? theme.palette.text : "#fff"}
-          >
-            {el.message}
-          </Typography>
+          {el.subtype.startsWith("image/") ? (
+            <img
+              src={el.fileUrl || el.fileData}
+              // alt={el.message}
+              onClick={() => handleOpen(el.fileUrl)}
+              style={{ maxHeight: 210, borderRadius: "10px" }}
+            />
+          ) : (
+            <video src={el.fileUrl || el.fileData} controls></video>
+          )}
+          <Stack flexDirection={"row"} gap="10px" alignItems={"center"}>
+            {el.subtype.startsWith("image/") ? (
+              <Image size={48} color={el.incoming ? "black" : "#fff"} />
+            ) : (
+              <FileVideo size={48} color={el.incoming ? "black" : "#fff"} />
+            )}
+            <Stack sx={{ flex: 1 }}>
+              <Typography
+                variant="body2"
+                color={el.incoming ? theme.palette.text : "#fff"}
+              >
+                {el.fileName}
+              </Typography>
+              <Typography
+                variant="body2"
+                color={el.incoming ? theme.palette.text : "#fff"}
+              >
+                {formatFileSize(el.fileSize)}
+              </Typography>
+            </Stack>
+            <Stack flexDirection={"row"}>
+              <IconButton>
+                <Folder size={30} color={el.incoming ? "black" : "#fff"} />
+              </IconButton>
+              <IconButton onClick={downloadFile}>
+                <DownloadSimple
+                  size={30}
+                  color={el.incoming ? "black" : "#fff"}
+                />
+              </IconButton>
+            </Stack>
+          </Stack>
         </Stack>
       </Box>
       {menu && <MessageOption />}

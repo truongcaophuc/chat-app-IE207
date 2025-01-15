@@ -6,6 +6,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Input,
 } from "@mui/material";
 import {
   Camera,
@@ -40,34 +41,9 @@ const StyledInput = styled(TextField)(({ theme }) => ({
 
 const Actions = [
   {
-    color: "#4da5fe",
-    icon: <Image size={24} />,
-    y: 102,
-    title: "Photo/Video",
-  },
-  {
-    color: "#1b8cfe",
-    icon: <Sticker size={24} />,
-    y: 172,
-    title: "Stickers",
-  },
-  {
-    color: "#0172e4",
-    icon: <Camera size={24} />,
-    y: 242,
-    title: "Image",
-  },
-  {
     color: "#0159b2",
     icon: <File size={24} />,
-    y: 312,
-    title: "Document",
-  },
-  {
-    color: "#013f7f",
-    icon: <User size={24} />,
-    y: 382,
-    title: "Contact",
+    title: "File",
   },
 ];
 
@@ -78,8 +54,72 @@ const ChatInput = ({
   value,
   inputRef,
 }) => {
+  const dispatch = useDispatch();
+  const { room_id } = useSelector((state) => state.app);
   const [openActions, setOpenActions] = React.useState(false);
+  const fileInputRef = useRef(null); // Tham chiếu đến input file
+  const user_id = window.localStorage.getItem("user_id");
+  const { current_conversation, conversations } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const handleFileClick = () => {
+    fileInputRef.current.click(); // Mở hộp thoại chọn file
+  };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]; // Lấy file được chọn
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const fileData = reader.result; // Nội dung file dưới dạng base64
+  
+        socket.emit("file_message", {
+          conversation_id: current_conversation.id,
+          from: user_id,
+          to: current_conversation.user_id,
+          file: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: fileData, // Nội dung file
+          },
+        });
+        dispatch(
+          AddDirectMessage({
+            message: {
+              type: "msg",
+              subtype: file.type,
+              fileName:file.name,
+              fileSize:file.size,
+              fileData: fileData,
+              incoming: false,
+              outgoing: true,
+            },
+            conversation_id: room_id,
+          })
+        );
+        dispatch(
+          SortConversation({
+            room_id,
+          })
+        );
+        dispatch(
+          UpdateDirectConversation({
+            conversation: room_id,
+            msg: { text: file.name },
+          })
+        );
+        dispatch(
+          UpdateMessageStatus({
+            conversation_id: room_id,
+            type: "Message sent",
+          })
+        );
+      };
+  
+      reader.readAsDataURL(file); // Đọc file dưới dạng base64
+    }
+  };
   return (
     <StyledInput
       inputRef={inputRef}
@@ -96,19 +136,22 @@ const ChatInput = ({
           <Stack sx={{ width: "max-content" }}>
             <Stack
               sx={{
-                position: "relative",
-                display: openActions ? "inline-block" : "none",
+                position: "absolute",
+                flexDirection: "column",
+                gap: "10px",
+                bottom: "60px",
+                display: openActions ? "flex" : "none",
               }}
             >
               {Actions.map((el, index) => (
                 <Tooltip placement="right" title={el.title} key={index}>
                   <Fab
                     onClick={() => {
+                      handleFileClick();
                       setOpenActions(!openActions);
                     }}
+                    
                     sx={{
-                      position: "absolute",
-                      top: -el.y,
                       backgroundColor: el.color,
                     }}
                     aria-label="add"
@@ -117,6 +160,12 @@ const ChatInput = ({
                   </Fab>
                 </Tooltip>
               ))}
+              <input
+                ref={fileInputRef}
+                type="file"
+                style={{ display: "none" }} // Ẩn input
+                onChange={handleFileChange}
+              />
             </Stack>
 
             <InputAdornment>
