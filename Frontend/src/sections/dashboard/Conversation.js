@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./index.css"
+import "./index.css";
 import {
   Stack,
   Box,
@@ -10,7 +10,7 @@ import {
   Divider,
   Modal,
 } from "@mui/material";
-import { LinkPreview } from '@dhaiwat10/react-link-preview';
+import { LinkPreview } from "@dhaiwat10/react-link-preview";
 import Microlink from "@microlink/react";
 import Avatar from "react-avatar";
 import { useTheme, alpha } from "@mui/material/styles";
@@ -21,11 +21,25 @@ import {
   Folder,
   FileVideo,
 } from "phosphor-react";
-import { Message_options } from "../../data";
 import { Link } from "react-router-dom";
 import { SocialMediaEmbed } from "react-social-media-embed";
 import { useDispatch, useSelector } from "react-redux";
-const MessageOption = () => {
+const MessageOption = ({ method, data }) => {
+  const { handleReply } = method;
+  const Message_options = [
+    {
+      title: "Trả lời",
+      click: (event) => {
+        handleReply(data);
+      },
+    },
+    {
+      title: "Chia sẻ",
+      click: (event) => {
+        handleReply(event);
+      },
+    },
+  ];
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -55,7 +69,14 @@ const MessageOption = () => {
       >
         <Stack spacing={1} px={1}>
           {Message_options.map((el) => (
-            <MenuItem onClick={handleClose}>{el.title}</MenuItem>
+            <MenuItem
+              onClick={() => {
+                el.click(el.title);
+                handleClose();
+              }}
+            >
+              {el.title}
+            </MenuItem>
           ))}
         </Stack>
       </Menu>
@@ -71,7 +92,7 @@ const formatFileSize = (size) => {
   }
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 };
-const TextMsg = ({ el, menu, messageRefs, index }) => {
+const TextMsg = ({ el, menu, messageRefs, index, method }) => {
   const theme = useTheme();
   const { current_conversation, conversations } = useSelector(
     (state) => state.conversation.direct_chat
@@ -128,11 +149,11 @@ const TextMsg = ({ el, menu, messageRefs, index }) => {
           <Avatar src={``} round size="15" name={current_conversation.name} />
         )}
       </Stack>
-      {menu && <MessageOption />}
+      {menu && <MessageOption method={method} data={el} />}
     </Stack>
   );
 };
-const MediaMsg = ({ el, menu }) => {
+const MediaMsg = ({ el, menu, method }) => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const theme = useTheme();
@@ -236,11 +257,11 @@ const MediaMsg = ({ el, menu }) => {
           </Stack>
         </Stack>
       </Box>
-      {menu && <MessageOption />}
+      {menu && <MessageOption method={method} />}
     </Stack>
   );
 };
-const DocMsg = ({ el, menu }) => {
+const DocMsg = ({ el, menu, method }) => {
   const theme = useTheme();
   return (
     <Stack direction="row" justifyContent={el.incoming ? "start" : "end"}>
@@ -280,11 +301,11 @@ const DocMsg = ({ el, menu }) => {
           </Typography>
         </Stack>
       </Box>
-      {menu && <MessageOption />}
+      {menu && <MessageOption method={method} />}
     </Stack>
   );
 };
-const LinkMsg = ({ el, menu }) => {
+const LinkMsg = ({ el, menu, method }) => {
   const theme = useTheme();
   return (
     <Stack direction="row" justifyContent={el.incoming ? "start" : "end"}>
@@ -300,33 +321,32 @@ const LinkMsg = ({ el, menu }) => {
           maxWidth: "400px",
         }}
       >
-          <Stack
-            direction="column"
-            spacing={1}
-            alignItems="center"
-          >
-            <Stack direction={"column"} spacing={2}>
+        <Stack direction="column" spacing={1}>
+          <Stack direction={"column"} spacing={2}>
             <Typography
-            variant="body2"
-            color={el.incoming ? theme.palette.text : "#fff"}
-            sx={{
-              "& a": {
-                color: el.incoming ? "black" : "#fff", 
-                textDecoration: "none",
-              },
-            }}
-          >
-            <div dangerouslySetInnerHTML={{ __html:el.message}}></div>
-          </Typography>
-            </Stack>
-          <Microlink url={el.message.match(/href="([^"]+)"/)[1]} style={{minWidth:"300px",width:"100%"}}/>
+              variant="body2"
+              color={el.incoming ? theme.palette.text : "#fff"}
+              sx={{
+                "& a": {
+                  color: el.incoming ? "black" : "#fff",
+                  textDecoration: "none",
+                },
+              }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: el.message }}></div>
+            </Typography>
           </Stack>
+          <Microlink
+            url={el.message.match(/href="([^"]+)"/)[1]}
+            style={{ minWidth: "300px", width: "100%" }}
+          />
+        </Stack>
       </Box>
-      {menu && <MessageOption />}
+      {menu && <MessageOption method={method} />}
     </Stack>
   );
 };
-const ReplyMsg = ({ el, menu }) => {
+const ReplyMsg = ({ el, menu, method }) => {
   const theme = useTheme();
   return (
     <Stack direction="row" justifyContent={el.incoming ? "start" : "end"}>
@@ -337,38 +357,47 @@ const ReplyMsg = ({ el, menu }) => {
           backgroundColor: el.incoming
             ? alpha(theme.palette.background.paper, 1)
             : theme.palette.primary.main,
-          borderRadius: 1.5,
           width: "max-content",
+          borderRadius: 1.5,
         }}
       >
         <Stack spacing={2}>
           <Stack
             p={2}
-            direction="column"
-            spacing={3}
+            direction="row"
+            spacing={1}
             alignItems="center"
             sx={{
-              backgroundColor: alpha(theme.palette.background.paper, 1),
-
-              borderRadius: 1,
+              backgroundColor: "#ededed",
+              height: "70px",
             }}
           >
-            <Typography variant="body2" color={theme.palette.text}>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              sx={{
+                borderRightWidth: "3px", // Độ dày cho vertical
+                borderColor: "#009a24",
+              }}
+            />
+            <Stack>
+              <Typography variant="body2">{el.replyTo?.name}</Typography>
+              <Typography variant="body2" color={theme.palette.text}>
+                {el.replyTo?.message}
+              </Typography>
+            </Stack>
+          </Stack>
+          <Stack>
+            <Typography
+              variant="body2"
+              color={el.incoming ? theme.palette.text : "#fff"}
+            >
               {el.message}
             </Typography>
           </Stack>
-          <Typography
-            variant="body2"
-            color={el.incoming ? theme.palette.text : "#fff"}
-          >
-            {el.reply}
-          </Typography>
-          <Avatar
-            src={`https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`}
-          />
         </Stack>
       </Box>
-      {menu && <MessageOption />}
+      {menu && <MessageOption method={method} />}
     </Stack>
   );
 };

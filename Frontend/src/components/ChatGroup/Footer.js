@@ -270,10 +270,11 @@ const Footer = () => {
                       AddGroupMessage({
                         message: {
                           type: "msg",
-                          subtype: "Text",
+                          subtype: containsUrl(value) ? "Link" : "Text",
                           message: value,
                           incoming: false,
                           outgoing: true,
+                          created_at:Date.now()
                         },
                         conversation_id: group_id,
                       })

@@ -22,12 +22,12 @@ const OneToOneMessage = require("./models/OneToOneMessage");
 const GroupConversation = require("./models/GroupConversation");
 const AudioCall = require("./models/audioCall");
 const VideoCall = require("./models/videoCall");
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
-  cloud_name: 'dv0enj2px',
-  api_key: '118223624632426',
-  api_secret: '25QTrzie0WOKdsMxrvwy2gJRWjE'
+  cloud_name: "dv0enj2px",
+  api_key: "118223624632426",
+  api_secret: "25QTrzie0WOKdsMxrvwy2gJRWjE",
 });
 // Add this
 // Create an io server and allow for CORS from http://localhost:3000 with GET and POST methods
@@ -122,10 +122,10 @@ io.on("connection", async (socket) => {
   });
   socket.on("addMember", async (data) => {
     const { id, members } = data;
-    console.log("id là",id)
-    console.log("members là",members)
+    console.log("id là", id);
+    console.log("members là", members);
     const group = await GroupConversation.findById(id);
-    group.participants=[...group.participants,...members]
+    group.participants = [...group.participants, ...members];
     await group.save({ new: true, validateModifiedOnly: true });
   });
   socket.on("accept_request", async (data) => {
@@ -321,19 +321,28 @@ io.on("connection", async (socket) => {
   socket.on("text_message", async (data) => {
     // data: {to, from, text}
 
-    const { message, conversation_id, from, to, type } = data;
+    const { message, conversation_id, from, to, type, replyTo } = data;
 
     const to_user = await User.findById(to);
 
     // message => {to, from, type, created_at, text, file}
 
-    const new_message = {
-      to: to,
-      from: from,
-      type: type,
-      created_at: Date.now(),
-      text: message,
-    };
+    const new_message = replyTo
+      ? {
+          to: to,
+          from: from,
+          type: type,
+          created_at: Date.now(),
+          text: message,
+          replyTo: replyTo,
+        }
+      : {
+          to: to,
+          from: from,
+          type: type,
+          created_at: Date.now(),
+          text: message,
+        };
 
     // fetch OneToOneMessage Doc & push a new message to existing conversation
     const chat = await OneToOneMessage.findById(conversation_id);
@@ -350,26 +359,26 @@ io.on("connection", async (socket) => {
   });
 
   // handle Media/Document Message
-  socket.on("file_message",async (data) => {
-    const {conversation_id,from,to,file}=data
+  socket.on("file_message", async (data) => {
+    const { conversation_id, from, to, file } = data;
     const to_user = await User.findById(to);
     try {
       const result = await cloudinary.uploader.upload(file.data, {
         folder: file.type,
-        resource_type: 'auto', // Cloudinary sẽ tự động nhận diện loại file
+        resource_type: "auto", // Cloudinary sẽ tự động nhận diện loại file
       });
-  
-      console.log('Upload successful:', result);
+
+      console.log("Upload successful:", result);
       const new_message = {
         to: to,
         from: from,
         type: file.type,
         created_at: Date.now(),
         fileName: file.name,
-        fileSize:file.size,
+        fileSize: file.size,
         fileUrl: result.secure_url, // URL của file đã được upload
       };
-  
+
       // fetch OneToOneMessage Doc & push a new message to existing conversation
       const chat = await OneToOneMessage.findById(conversation_id);
       chat.messages.push(new_message);
@@ -380,14 +389,14 @@ io.on("connection", async (socket) => {
         message: new_message,
       });
     } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
+      console.error("Error uploading to Cloudinary:", error);
       throw error;
     }
-  //console.log(data.file.name)
+    //console.log(data.file.name)
     // data: {to, from, text, file}
 
     // Get the file extension
-   // const fileExtension = path.extname(data.file.name);
+    // const fileExtension = path.extname(data.file.name);
 
     // Generate a unique filename
     // const filename = `${Date.now()}_${Math.floor(

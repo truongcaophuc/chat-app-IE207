@@ -308,22 +308,10 @@ const Chat_History = [
 
 const Message_options = [
   {
-    title: "Reply",
+    title: "Trả lời",
   },
   {
-    title: "React to message",
-  },
-  {
-    title: "Forward message",
-  },
-  {
-    title: "Star message",
-  },
-  {
-    title: "Report",
-  },
-  {
-    title: "Delete Message",
+    title: "Chia sẻ",
   },
 ];
 

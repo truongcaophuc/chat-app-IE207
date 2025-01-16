@@ -1,5 +1,5 @@
 import { Stack, Box, Divider, Chip } from "@mui/material";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef,useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { SimpleBarStyle } from "../../components/Scrollbar";
 import { format, parseISO } from "date-fns";
@@ -21,6 +21,7 @@ import {
 } from "../../redux/slices/conversation";
 import { socket } from "../../socket";
 const groupMessagesByDate = (messages) => {
+  console.log("thời gian là",messages)
   if (messages)
     return messages.reduce((groups, message) => {
       const date = format(parseISO(message.created_at), "yyyy-MM-dd"); // Lấy ngày từ timestamp
@@ -31,9 +32,8 @@ const groupMessagesByDate = (messages) => {
       return groups;
     }, {});
 };
-const Conversation = ({ isMobile, menu, messageRefs }) => {
+const Conversation = ({ isMobile, menu, messageRefs,method }) => {
   const dispatch = useDispatch();
-
   const { conversations, current_messages, current_conversation } = useSelector(
     (state) => state.conversation.direct_chat
   );
@@ -53,23 +53,12 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
   }, [room_id]);
   return (
     current_conversation && (
-      <Box
-        p={isMobile ? 1 : 3}
-        style={{ position: "relative", minHeight: "100vh" }}
-      >
+      <Box p={isMobile ? 1 : 3} >
         <Stack spacing={3}>
           {Object.keys(groupedMessages).map((date) => (
-            <div style={{ minHeight: "500px" }}>
+            <div>
               <Stack spacing={1}>
-                <Divider
-                  textAlign="center"
-                  style={{
-                    padding: "20px",
-                    position: "sticky",
-                    top: "100px",
-                    zIndex: 1,
-                  }}
-                >
+                <Divider textAlign="center">
                   <Chip
                     label={format(parseISO(date), "dd/MM/yyyy")}
                     size="small"
@@ -92,6 +81,7 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
                               menu={menu}
                               index={index}
                               messageRefs={messageRefs}
+                              method={method}
                             />
                           );
                         case "Link":
@@ -102,9 +92,10 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
                               menu={menu}
                               index={index}
                               messageRefs={messageRefs}
+                              method={method}
                             />
                           );
-                        case "reply":
+                        case "Reply":
                           return (
                             //  ReplyMessage
                             <ReplyMsg
@@ -112,6 +103,7 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
                               menu={menu}
                               index={index}
                               messageRefs={messageRefs}
+                              method={method}
                             />
                           );
                         default:
@@ -122,6 +114,7 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
                               menu={menu}
                               index={index}
                               messageRefs={messageRefs}
+                              method={method}
                             />
                           );
                       }
@@ -141,13 +134,18 @@ const Conversation = ({ isMobile, menu, messageRefs }) => {
 const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
-
+  const [replyTo, setReplyTo] = useState(null);
   const messageListRef = useRef(null);
 
   const { current_messages } = useSelector(
     (state) => state.conversation.direct_chat
   );
-
+  const handleReply = (message) => {
+    setReplyTo(message); // Gán tin nhắn được trả lời
+  };
+  const clearReply = () => {
+    setReplyTo(null); // Hủy tin nhắn trả lời
+  };
   useEffect(() => {
     // Scroll to the bottom of the message list when new messages are added
     messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
@@ -167,8 +165,7 @@ const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
         sx={{
           position: "relative",
           flexGrow: 1,
-          overflow: "scroll",
-
+          overflowY: "scroll",
           backgroundColor:
             theme.palette.mode === "light"
               ? "#F0F4FA"
@@ -182,12 +179,14 @@ const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
             menu={true}
             isMobile={isMobile}
             messageRefs={messageRefs}
+
+            method={{replyTo,handleReply}}
           />
         </SimpleBarStyle>
       </Box>
 
       {/*  */}
-      <ChatFooter />
+      <ChatFooter method={{replyTo,handleReply}}/>
     </Stack>
   );
 };
