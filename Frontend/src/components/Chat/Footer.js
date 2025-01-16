@@ -319,7 +319,7 @@ const Footer = () => {
                       AddDirectMessage({
                         message: {
                           type: "msg",
-                          subtype: "Text",
+                          subtype: containsUrl(value) ? "Link" : "Text",
                           message: linkify(value),
                           incoming: false,
                           outgoing: true,

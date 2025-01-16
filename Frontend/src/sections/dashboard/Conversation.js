@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./index.css"
 import {
   Stack,
   Box,
@@ -9,6 +10,8 @@ import {
   Divider,
   Modal,
 } from "@mui/material";
+import { LinkPreview } from '@dhaiwat10/react-link-preview';
+import Microlink from "@microlink/react";
 import Avatar from "react-avatar";
 import { useTheme, alpha } from "@mui/material/styles";
 import {
@@ -294,33 +297,30 @@ const LinkMsg = ({ el, menu }) => {
             : theme.palette.primary.main,
           borderRadius: 1.5,
           width: "max-content",
+          maxWidth: "400px",
         }}
       >
-        <Stack spacing={2}>
           <Stack
-            p={2}
             direction="column"
-            spacing={3}
-            alignItems="start"
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: 1,
-            }}
+            spacing={1}
+            alignItems="center"
           >
             <Stack direction={"column"} spacing={2}>
-              <SocialMediaEmbed
-                width={300}
-                url={`https://youtu.be/xoWxBR34qLE`}
-              />
-            </Stack>
-          </Stack>
-          <Typography
+            <Typography
             variant="body2"
             color={el.incoming ? theme.palette.text : "#fff"}
+            sx={{
+              "& a": {
+                color: el.incoming ? "black" : "#fff", 
+                textDecoration: "none",
+              },
+            }}
           >
-            <div dangerouslySetInnerHTML={{ __html: el.message }}></div>
+            <div dangerouslySetInnerHTML={{ __html:el.message}}></div>
           </Typography>
-        </Stack>
+            </Stack>
+          <Microlink url={el.message.match(/href="([^"]+)"/)[1]} style={{minWidth:"300px",width:"100%"}}/>
+          </Stack>
       </Box>
       {menu && <MessageOption />}
     </Stack>

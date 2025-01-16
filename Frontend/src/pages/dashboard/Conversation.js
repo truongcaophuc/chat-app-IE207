@@ -1,8 +1,8 @@
-import { Stack, Box } from "@mui/material";
+import { Stack, Box, Divider, Chip } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTheme } from "@mui/material/styles";
 import { SimpleBarStyle } from "../../components/Scrollbar";
-
+import { format, parseISO } from "date-fns";
 import { ChatHeader, ChatFooter } from "../../components/Chat";
 import useResponsive from "../../hooks/useResponsive";
 import { Chat_History } from "../../data";
@@ -20,14 +20,25 @@ import {
   SetCurrentConversation,
 } from "../../redux/slices/conversation";
 import { socket } from "../../socket";
-
-const Conversation = ({ isMobile, menu,messageRefs }) => {
+const groupMessagesByDate = (messages) => {
+  if (messages)
+    return messages.reduce((groups, message) => {
+      const date = format(parseISO(message.created_at), "yyyy-MM-dd"); // Lấy ngày từ timestamp
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+      return groups;
+    }, {});
+};
+const Conversation = ({ isMobile, menu, messageRefs }) => {
   const dispatch = useDispatch();
 
   const { conversations, current_messages, current_conversation } = useSelector(
     (state) => state.conversation.direct_chat
   );
   const { room_id } = useSelector((state) => state.app);
+  const groupedMessages = groupMessagesByDate(current_messages || []);
 
   useEffect(() => {
     const current = conversations.find((el) => el?.id === room_id);
@@ -42,53 +53,92 @@ const Conversation = ({ isMobile, menu,messageRefs }) => {
   }, [room_id]);
   return (
     current_conversation && (
-      <Box p={isMobile ? 1 : 3}>
+      <Box
+        p={isMobile ? 1 : 3}
+        style={{ position: "relative", minHeight: "100vh" }}
+      >
         <Stack spacing={3}>
-          {current_messages.map((el, index) => {
-            switch (el.type) {
-              case "divider":
-                return (
-                  // Timeline
-                  <Timeline el={el} index={index} messageRefs={messageRefs}/>
-                );
-
-              case "msg":
-                switch (el.subtype) {
-                  case "Text":
-                    return (
-                      // Doc Message
-                      <TextMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
-                    );
-                  case "Link":
-                    return (
-                      //  Link Message
-                      <LinkMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
-                    );
-
-                  case "reply":
-                    return (
-                      //  ReplyMessage
-                      <ReplyMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
-                    );
-
-                  default:
-                    return (
-                      // Text Message
-                      <MediaMsg el={el} menu={menu} index={index} messageRefs={messageRefs}/>
-                    );
-                }
-
-              default:
-                return <></>;
-            }
-          })}
+          {Object.keys(groupedMessages).map((date) => (
+            <div style={{ minHeight: "500px" }}>
+              <Stack spacing={1}>
+                <Divider
+                  textAlign="center"
+                  style={{
+                    padding: "20px",
+                    position: "sticky",
+                    top: "100px",
+                    zIndex: 1,
+                  }}
+                >
+                  <Chip
+                    label={format(parseISO(date), "dd/MM/yyyy")}
+                    size="small"
+                  />
+                </Divider>
+                {groupedMessages[date].map((el, index) => {
+                  switch (el.type) {
+                    // case "divider":
+                    //   return (
+                    //     // Timeline
+                    //     <Timeline el={el} index={index} messageRefs={messageRefs}/>
+                    //   );
+                    case "msg":
+                      switch (el.subtype) {
+                        case "Text":
+                          return (
+                            // Doc Message
+                            <TextMsg
+                              el={el}
+                              menu={menu}
+                              index={index}
+                              messageRefs={messageRefs}
+                            />
+                          );
+                        case "Link":
+                          return (
+                            //  Link Message
+                            <LinkMsg
+                              el={el}
+                              menu={menu}
+                              index={index}
+                              messageRefs={messageRefs}
+                            />
+                          );
+                        case "reply":
+                          return (
+                            //  ReplyMessage
+                            <ReplyMsg
+                              el={el}
+                              menu={menu}
+                              index={index}
+                              messageRefs={messageRefs}
+                            />
+                          );
+                        default:
+                          return (
+                            // Text Message
+                            <MediaMsg
+                              el={el}
+                              menu={menu}
+                              index={index}
+                              messageRefs={messageRefs}
+                            />
+                          );
+                      }
+                    default:
+                      return <></>;
+                  }
+                })}
+              </Stack>
+            </div>
+          ))}
         </Stack>
       </Box>
     )
   );
 };
 
-const ChatComponent = ({messageRefs,setShowSearchBar}) => {
+const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
   const isMobile = useResponsive("between", "md", "xs", "sm");
   const theme = useTheme();
 
@@ -110,7 +160,7 @@ const ChatComponent = ({messageRefs,setShowSearchBar}) => {
       width={isMobile ? "100vw" : "auto"}
     >
       {/*  */}
-      <ChatHeader setShowSearchBar={setShowSearchBar}/>
+      <ChatHeader setShowSearchBar={setShowSearchBar} />
       <Box
         ref={messageListRef}
         width={"100%"}
@@ -128,7 +178,11 @@ const ChatComponent = ({messageRefs,setShowSearchBar}) => {
         }}
       >
         <SimpleBarStyle timeout={500} clickOnTrack={false}>
-          <Conversation menu={true} isMobile={isMobile} messageRefs={messageRefs}/>
+          <Conversation
+            menu={true}
+            isMobile={isMobile}
+            messageRefs={messageRefs}
+          />
         </SimpleBarStyle>
       </Box>
 

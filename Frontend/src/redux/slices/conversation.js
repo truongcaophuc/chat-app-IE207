@@ -182,10 +182,11 @@ const slice = createSlice({
       state.group_chat.current_conversation = action.payload;
     },
     fetchCurrentMessages(state, action) {
+      console.log("current message", action.payload.messages)
       const user_id = window.localStorage.getItem("user_id");
       const messages = action.payload.messages;
       const formatted_messages = messages.map((el) => {
-        if(el.type==="Text")
+        if(el.type==="Text"||el.type==="Link")
         return {
           id: el._id,
           type: "msg",
@@ -193,6 +194,7 @@ const slice = createSlice({
           message: el.text,
           incoming: el.to === user_id,
           outgoing: el.from === user_id,
+          created_at:el.created_at
         };
         else return {
           id: el._id,
@@ -203,6 +205,7 @@ const slice = createSlice({
           fileUrl: el.fileUrl,
           incoming: el.to === user_id,
           outgoing: el.from === user_id,
+          created_at:el.created_at
         }
       });
       state.direct_chat.current_messages = formatted_messages;
