@@ -97,11 +97,10 @@ const UserElement = ({
           </Stack>
         </Stack>
         <Stack direction={"row"} spacing={2} alignItems={"center"}>
-
           <Button
             onClick={() => {
               console.log("đã gửi lời mời kết bạn");
-              if (!outgoingInvitations.includes(_id))
+              if (!outgoingInvitations.includes(_id)) {
                 socket.emit(
                   "friend_request",
                   { to: _id, from: user_id },
@@ -109,9 +108,10 @@ const UserElement = ({
                     alert("request sent");
                   }
                 );
-              dispatch(
-                UpdateOutgoingInvitaion({ invitation: _id, type: "add" })
-              );
+                dispatch(
+                  UpdateOutgoingInvitaion({ invitation: _id, type: "add" })
+                );
+              }
             }}
           >
             {outgoingInvitations.includes(_id) ? "Đã gửi lời mời" : "Kết bạn"}

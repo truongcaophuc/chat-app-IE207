@@ -56,7 +56,7 @@ const ChatInput = ({
   const { current_conversation } = useSelector(
     (state) => state.conversation.direct_chat
   );
-
+  const [openChooseFile,setOpenChooseFile] =useState(false)
   const handleFileClick = () => {
     fileInputRef.current.click();
   };
@@ -130,7 +130,7 @@ const ChatInput = ({
                 flexDirection: "column",
                 gap: "10px",
                 bottom: "60px",
-                display: openPicker ? "flex" : "none",
+                display: openChooseFile ? "flex" : "none",
               }}
             >
               {Actions.map((el, index) => (
@@ -155,7 +155,7 @@ const ChatInput = ({
             <InputAdornment>
               <IconButton
                 onClick={() => {
-                  setOpenPicker(!openPicker);
+                  setOpenChooseFile(!openChooseFile);
                 }}
               >
                 <LinkSimple />

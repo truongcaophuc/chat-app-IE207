@@ -332,7 +332,7 @@ io.on("connection", async (socket) => {
           to: to,
           from: from,
           type: type,
-          created_at: Date.now(),
+          created_at: new Date(Date.now()).toISOString(),
           text: message,
           replyTo: replyTo,
         }
@@ -340,7 +340,7 @@ io.on("connection", async (socket) => {
           to: to,
           from: from,
           type: type,
-          created_at: Date.now(),
+          created_at: new Date(Date.now()).toISOString(),
           text: message,
         };
 
@@ -373,7 +373,7 @@ io.on("connection", async (socket) => {
         to: to,
         from: from,
         type: file.type,
-        created_at: Date.now(),
+        created_at: new Date(Date.now()).toISOString(),
         fileName: file.name,
         fileSize: file.size,
         fileUrl: result.secure_url, // URL của file đã được upload
@@ -392,28 +392,33 @@ io.on("connection", async (socket) => {
       console.error("Error uploading to Cloudinary:", error);
       throw error;
     }
-    //console.log(data.file.name)
-    // data: {to, from, text, file}
-
-    // Get the file extension
-    // const fileExtension = path.extname(data.file.name);
-
-    // Generate a unique filename
-    // const filename = `${Date.now()}_${Math.floor(
-    //   Math.random() * 10000
-    // )}${fileExtension}`;
-
-    // upload file to AWS s3
-
-    // create a new conversation if its dosent exists yet or add a new message to existing conversation
-
-    // save to db
-
-    // emit incoming_message -> to user
-
-    // emit outgoing_message -> from user
   });
-
+  socket.on("share_message", async (data) => {
+    const { from, to, message } = data;
+    console.log("from là",from)
+    console.log("to là",to)
+    to.map(async (user) => {
+      const to_user = await User.findById(user);
+      const new_message = {
+        to: user,
+        from: from,
+        type: message.subtype,
+        created_at: new Date(Date.now()).toISOString(),
+        text: message.message,
+      };
+      const conversation = await OneToOneMessage.findOne({
+        participants: { $all: [user, from] },
+      });
+      console.log("conversation la", conversation._id)
+      conversation.messages.push(new_message);
+      await conversation.save();
+      socket.to(to_user?.socket_id).emit("new_message", {
+        conversation_id:conversation._id,
+        message: new_message,
+      });
+    });
+ 
+  });
   // -------------- HANDLE AUDIO CALL SOCKET EVENTS ----------------- //
 
   // handle start_audio_call event

@@ -117,7 +117,7 @@ const slice = createSlice({
       state.group_chat.conversations = list;
     },
     updateDirectConversation(state, action) {
-      const { conversation, msg, room_id } = action.payload;
+      const { conversation, msg, room_id,type } = action.payload;
       const this_conversation_id = conversation || room_id;
       state.direct_chat.conversations.forEach((conversation) => {
         if (conversation.id === this_conversation_id) {
@@ -125,7 +125,7 @@ const slice = createSlice({
             conversation.time = `Vài giây`;
           }
           if (msg) conversation.msg = msg.text;
-          if (room_id && this_conversation_id === room_id) {
+          if (room_id && this_conversation_id === room_id||type==="Share") {
             conversation.unread = 0;
           } else conversation.unread += 1;
         }
@@ -342,11 +342,11 @@ export const AddGroupConversation = ({ group }) => {
     dispatch(slice.actions.addGroupConversation({ group }));
   };
 };
-export const UpdateDirectConversation = ({ conversation, msg }) => {
+export const UpdateDirectConversation = ({ conversation, msg,type }) => {
   return async (dispatch, getState) => {
     const room_id = getState().app.room_id; // In ra state để kiểm tra hoặc sử dụng trong logic
     dispatch(
-      slice.actions.updateDirectConversation({ conversation, msg, room_id })
+      slice.actions.updateDirectConversation({ conversation, msg, room_id,type })
     );
   };
 };

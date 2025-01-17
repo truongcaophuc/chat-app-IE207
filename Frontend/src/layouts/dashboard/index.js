@@ -141,6 +141,7 @@ const DashboardLayout = () => {
               fileUrl: message.fileUrl,
               incoming: message.to === user_id,
               outgoing: message.from === user_id,
+              created_at:message.created_at
             },
             conversation_id,
           })
@@ -173,7 +174,8 @@ const DashboardLayout = () => {
               message: message.text,
               incoming: message.from !== user_id,
               outgoing: message.from === user_id,
-              from:data.from
+              from:data.from,
+              created_at:message.created_at
             },
             conversation_id,
           })

@@ -20,23 +20,28 @@ import {
   Image,
   Folder,
   FileVideo,
+  Share,
+  Chat,
 } from "phosphor-react";
 import { Link } from "react-router-dom";
 import { SocialMediaEmbed } from "react-social-media-embed";
 import { useDispatch, useSelector } from "react-redux";
 const MessageOption = ({ method, data }) => {
-  const { handleReply } = method;
+  const { handleReply, handleOpen, setMessageShare } = method;
   const Message_options = [
     {
       title: "Trả lời",
+      icon: <Chat></Chat>,
       click: (event) => {
         handleReply(data);
       },
     },
     {
       title: "Chia sẻ",
-      click: (event) => {
-        handleReply(event);
+      icon: <Share></Share>,
+      click: () => {
+        setMessageShare(data);
+        handleOpen();
       },
     },
   ];
@@ -74,8 +79,18 @@ const MessageOption = ({ method, data }) => {
                 el.click(el.title);
                 handleClose();
               }}
+              style={{ alignItems: "center" }}
             >
-              {el.title}
+              <Stack
+                style={{
+                  flexDirection: "row",
+                  gap: "16px",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>{el.icon}</Typography>
+                <Typography>{el.title}</Typography>
+              </Stack>
             </MenuItem>
           ))}
         </Stack>
