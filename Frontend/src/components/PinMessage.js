@@ -43,10 +43,10 @@ export default function MessageList({ messageRefs }) {
   return (
     <Box
       style={{
-        position: "fixed",
-        top: "70px",
-        width: "70%",
-        right: "20px",
+        position: "absolute",
+        top: "80px",
+        width: "98%",
+        left: "10px",
         zIndex: 10,
       }}
     >

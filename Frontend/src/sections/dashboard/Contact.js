@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
-  Avatar,
   Box,
   Button,
   Divider,
@@ -15,6 +14,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import Avatar from "react-avatar";
 import { faker } from "@faker-js/faker";
 import {
   Bell,
@@ -25,6 +25,7 @@ import {
   Trash,
   VideoCamera,
   X,
+  Users,
 } from "phosphor-react";
 import useResponsive from "../../hooks/useResponsive";
 import AntSwitch from "../../components/AntSwitch";
@@ -44,15 +45,15 @@ const BlockDialog = ({ open, handleClose }) => {
       onClose={handleClose}
       aria-describedby="alert-dialog-slide-description"
     >
-      <DialogTitle>Block this contact</DialogTitle>
+      <DialogTitle>Cảnh báo</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-slide-description">
-          Are you sure you want to block this Contact?
+          Bạn có chắc chắn muốn chặn người này?
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleClose}>Yes</Button>
+        <Button onClick={handleClose}>Hủy</Button>
+        <Button onClick={handleClose}>Tiếp tục</Button>
       </DialogActions>
     </Dialog>
   );
@@ -67,15 +68,15 @@ const DeleteChatDialog = ({ open, handleClose }) => {
       onClose={handleClose}
       aria-describedby="alert-dialog-slide-description"
     >
-      <DialogTitle>Delete this chat</DialogTitle>
+      <DialogTitle>Xóa lịch sử</DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-slide-description">
-          Are you sure you want to delete this chat?
+          Bạn có chắc chắn muốn xóa lịch sử đoạn chat này?
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleClose}>Yes</Button>
+        <Button onClick={handleClose}>Hủy</Button>
+        <Button onClick={handleClose}>Tiếp tục</Button>
       </DialogActions>
     </Dialog>
   );
@@ -84,8 +85,22 @@ const DeleteChatDialog = ({ open, handleClose }) => {
 const Contact = () => {
   const dispatch = useDispatch();
 
-  const {current_conversation} = useSelector((state) => state.conversation.direct_chat);
-
+  const { current_conversation } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
+  const { user_id } = useSelector((state) => state.auth);
+  const { conversations } = useSelector(
+    (state) => state.conversation.group_chat
+  );
+  const commonGroup = conversations.filter((conversation) => {
+    return (
+      conversation?.users.filter((user) => {
+        return (
+          user?._id == user_id || user?._id == current_conversation.user_id
+        );
+      }).length == 2
+    );
+  });
   const theme = useTheme();
 
   const isDesktop = useResponsive("up", "md");
@@ -95,10 +110,10 @@ const Contact = () => {
 
   const handleCloseBlock = () => {
     setOpenBlock(false);
-  }
+  };
   const handleCloseDelete = () => {
     setOpenDelete(false);
-  }
+  };
 
   return (
     <Box sx={{ width: !isDesktop ? "100vw" : 320, maxHeight: "100vh" }}>
@@ -120,7 +135,7 @@ const Contact = () => {
             justifyContent="space-between"
             spacing={3}
           >
-            <Typography variant="subtitle2">Contact Info</Typography>
+            <Typography variant="subtitle2">Thông tin hội thoại</Typography>
             <IconButton
               onClick={() => {
                 dispatch(ToggleSidebar());
@@ -141,11 +156,7 @@ const Contact = () => {
           spacing={3}
         >
           <Stack alignItems="center" direction="row" spacing={2}>
-            <Avatar
-              src={current_conversation?.img}
-              alt={current_conversation?.name}
-              sx={{ height: 64, width: 64 }}
-            />
+            <Avatar name={current_conversation?.name} size={64} round={true} />
             <Stack spacing={0.5}>
               <Typography variant="article" fontWeight={600}>
                 {current_conversation?.name}
@@ -174,13 +185,24 @@ const Contact = () => {
               <Typography variant="overline">Video</Typography>
             </Stack>
           </Stack>
-          <Divider />
-          <Stack spacing={0.5}>
+          {/* <Stack spacing={0.5}>
             <Typography variant="article" fontWeight={600}>
               About
             </Typography>
             <Typography variant="body2" fontWeight={500}>
               {current_conversation?.about}
+            </Typography>
+          </Stack> */}
+          <Divider />
+          <Stack flexDirection={"row"}style={{gap:"16px",alignItems:'center'}}>
+            <Users size={20}/>
+            <Typography
+              variant="body2"
+              onClick={() => {
+                dispatch(UpdateSidebarType("CommonGroup"));
+              }}
+            >
+              {commonGroup.length} nhóm chung
             </Typography>
           </Stack>
           <Divider />
@@ -189,14 +211,14 @@ const Contact = () => {
             alignItems="center"
             justifyContent={"space-between"}
           >
-            <Typography variant="subtitle2">Media, Links & Docs</Typography>
+            <Typography variant="subtitle2">Ảnh/Video/Tài liệu</Typography>
             <Button
               onClick={() => {
                 dispatch(UpdateSidebarType("SHARED"));
               }}
               endIcon={<CaretRight />}
             >
-              401
+              Xem tất cả
             </Button>
           </Stack>
           <Stack direction={"row"} alignItems="center" spacing={2}>
@@ -207,7 +229,7 @@ const Contact = () => {
             ))}
           </Stack>
           <Divider />
-          <Stack
+          {/* <Stack
             direction="row"
             alignItems="center"
             justifyContent={"space-between"}
@@ -224,7 +246,7 @@ const Contact = () => {
             >
               <CaretRight />
             </IconButton>
-          </Stack>
+          </Stack> */}
           <Divider />
           <Stack
             direction="row"
@@ -233,24 +255,13 @@ const Contact = () => {
           >
             <Stack direction="row" alignItems="center" spacing={2}>
               <Bell size={21} />
-              <Typography variant="subtitle2">Mute Notifications</Typography>
+              <Typography variant="subtitle2">Tắt thông báo</Typography>
             </Stack>
 
             <AntSwitch />
           </Stack>
           <Divider />
-          <Typography variant="body2">1 group in common</Typography>
-          <Stack direction="row" alignItems={"center"} spacing={2}>
-            <Avatar src={faker.image.imageUrl()} alt={faker.name.fullName()} />
-            <Stack direction="column" spacing={0.5}>
-              <Typography variant="subtitle2">Camel’s Gang</Typography>
-              <Typography variant="caption">
-                Owl, Parrot, Rabbit , You
-              </Typography>
-            </Stack>
-          </Stack>
-          <Divider />
-          <Stack direction="row" alignItems={"center"} spacing={2}>
+          <Stack direction="column" alignItems={"center"} spacing={2}>
             <Button
               onClick={() => {
                 setOpenBlock(true);
@@ -259,7 +270,7 @@ const Contact = () => {
               startIcon={<Prohibit />}
               variant="outlined"
             >
-              Block
+              Chặn
             </Button>
             <Button
               onClick={() => {
@@ -269,13 +280,17 @@ const Contact = () => {
               startIcon={<Trash />}
               variant="outlined"
             >
-              Delete
+              Xóa lịch sử trò chuyện
             </Button>
           </Stack>
         </Stack>
       </Stack>
-      {openBlock && <BlockDialog open={openBlock} handleClose={handleCloseBlock} />}
-      {openDelete && <DeleteChatDialog open={openDelete} handleClose={handleCloseDelete} />}
+      {openBlock && (
+        <BlockDialog open={openBlock} handleClose={handleCloseBlock} />
+      )}
+      {openDelete && (
+        <DeleteChatDialog open={openDelete} handleClose={handleCloseDelete} />
+      )}
     </Box>
   );
 };

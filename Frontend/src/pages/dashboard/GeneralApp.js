@@ -10,6 +10,7 @@ import Contact from "../../sections/dashboard/Contact";
 import NoChat from "../../assets/Illustration/NoChat";
 import { useSelector } from "react-redux";
 import StarredMessages from "../../sections/dashboard/StarredMessages";
+import CommonGroup from "../../sections/dashboard/CommonGroup";
 import Media from "../../sections/dashboard/SharedMessages";
 
 const GeneralApp = () => {
@@ -75,7 +76,8 @@ const GeneralApp = () => {
 
               case "STARRED":
                 return <StarredMessages />;
-
+                case "CommonGroup":
+                  return <CommonGroup />;
               case "SHARED":
                 return <Media />;
 

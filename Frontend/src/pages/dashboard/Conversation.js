@@ -47,6 +47,7 @@ import {
   UpdateDirectConversation,
   AddDirectMessage,
   UpdateMessageStatus,
+  FetchGroupConversations,
 } from "../../redux/slices/conversation";
 import { socket } from "../../socket";
 
@@ -82,7 +83,7 @@ const Conversation = ({ isMobile, menu, messageRefs, method }) => {
   );
   const { room_id } = useSelector((state) => state.app);
   const groupedMessages = groupMessagesByDate(current_messages || []);
-
+  const user_id = window.localStorage.getItem("user_id");
   useEffect(() => {
     const current = conversations.find((el) => el?.id === room_id);
 
@@ -93,6 +94,13 @@ const Conversation = ({ isMobile, menu, messageRefs, method }) => {
     });
 
     dispatch(SetCurrentConversation(current));
+
+    socket.emit("get_group_conversations", { user_id }, (data) => {
+      console.log("Dữ liệu data là :", data); // this data is the list of conversations
+      // dispatch action
+
+      dispatch(FetchGroupConversations({ conversations: data }));
+    });
   }, [room_id]);
   return (
     current_conversation && (
@@ -285,7 +293,6 @@ const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
         ref={messageListRef}
         width={"100%"}
         sx={{
-          position: "relative",
           flexGrow: 1,
           overflowY: "scroll",
           backgroundColor:

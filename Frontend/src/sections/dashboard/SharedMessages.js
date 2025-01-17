@@ -7,21 +7,31 @@ import {
   Typography,
   Tabs,
   Tab,
-  Grid,
+  Divider
 } from "@mui/material";
-import { ArrowLeft } from "phosphor-react";
+import { ArrowLeft, Image, FileVideo,Link } from "phosphor-react";
 import useResponsive from "../../hooks/useResponsive";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { UpdateSidebarType } from "../../redux/slices/app";
 import { faker } from "@faker-js/faker";
-import { DocMsg, LinkMsg } from "./Conversation";
+import { MediaMsg, LinkMsg } from "./Conversation";
 import { Shared_docs, Shared_links } from "../../data";
-
+const formatFileSize = (size) => {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let unitIndex = 0;
+  while (size > 1024 && unitIndex < units.length) {
+    size /= 1024;
+    unitIndex++;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+};
 const Media = () => {
   const dispatch = useDispatch();
 
   const theme = useTheme();
-
+  const { current_messages } = useSelector(
+    (state) => state.conversation.direct_chat
+  );
   const isDesktop = useResponsive("up", "md");
 
   const [value, setValue] = React.useState(0);
@@ -29,7 +39,17 @@ const Media = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const mediaMsg = current_messages.filter((message) => {
+    return (
+      message.subtype.startsWith("image/") ||
+      message.subtype.startsWith("video/")
+    );
+  });
 
+  console.log("giá trị media msg là", mediaMsg);
+  const linkMsg = current_messages.filter((message) => {
+    return message.subtype === "Link";
+  });
   return (
     <Box sx={{ width: !isDesktop ? "100vw" : 320, maxHeight: "100vh" }}>
       <Stack sx={{ height: "100%" }}>
@@ -50,20 +70,19 @@ const Media = () => {
             spacing={3}
           >
             <IconButton
-               onClick={() => {
+              onClick={() => {
                 dispatch(UpdateSidebarType("CONTACT"));
               }}
             >
               <ArrowLeft />
             </IconButton>
-            <Typography variant="subtitle2">Shared</Typography>
+            <Typography variant="subtitle2">File</Typography>
           </Stack>
         </Box>
 
         <Tabs value={value} onChange={handleChange} centered>
           <Tab label="Media" />
           <Tab label="Links" />
-          <Tab label="Docs" />
         </Tabs>
         <Stack
           sx={{
@@ -75,28 +94,76 @@ const Media = () => {
           spacing={3}
           padding={value === 1 ? 1 : 3}
         >
-          {/* <Conversation starred={true} /> */}
           {(() => {
             switch (value) {
               case 0:
-                return (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6].map((el) => (
-                      <Grid item xs={4}>
-                        <img
-                          src={faker.image.city()}
-                          alt={faker.internet.userName()}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                );
+                return mediaMsg.map((el, index) => {
+                  return (
+                    <Stack>
+                      <Stack
+                        flexDirection={"row"}
+                        gap="10px"
+                        alignItems={"center"}
+                      >
+                        {el.subtype.startsWith("image/") ? (
+                          <Image
+                            size={48}
+                            color={"#0088ff"}
+                          />
+                        ) : (
+                          <FileVideo
+                            size={48}
+                            color={"#ff9b04"}
+                          />
+                        )}
+                        <Stack sx={{ flex: 1 }}>
+                          <Typography
+                            variant="body2"
+                            color={"black"}
+                          >
+                            {el.fileName}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color={"black"}
+                          >
+                            {formatFileSize(el.fileSize)}
+                          </Typography>
+                        </Stack>
+                      </Stack>
+                        <Divider/>
+                    </Stack>
+                  );
+                });
+
               case 1:
-                return Shared_links.map((el) => <LinkMsg el={el} />);
-
-              case 2:
-                return Shared_docs.map((el) => <DocMsg el={el} />);
-
+                return linkMsg.map((el, index) => {
+                  return (
+                    <Stack direction="column" spacing={1}>
+                      <Stack direction={"row"} spacing={2} style={{alignItems:"center"}}>
+                      <Link
+                          size={48}
+                          color={"#12af00"}
+                        />
+                        <Typography
+                          variant="body2"
+                          color={"black"}
+                          sx={{
+                            "& a": {
+                              color: "black",
+                              textDecoration: "none",
+                            },
+                          }}
+                        >
+                          <div
+                            dangerouslySetInnerHTML={{ __html: el.message }}
+                          ></div>
+                        </Typography>
+                      </Stack>
+                      <Divider/>
+                    </Stack>
+                  );
+                });
               default:
                 break;
             }
