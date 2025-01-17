@@ -41,6 +41,10 @@ const oneToOneMessageSchema = new mongoose.Schema({
         type: Boolean,
         default:false,
       },
+      isPin: {
+        type: Boolean,
+        default:false,
+      },
       replyTo: {
         type: Object,
       },

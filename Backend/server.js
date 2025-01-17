@@ -419,6 +419,18 @@ io.on("connection", async (socket) => {
     });
  
   });
+  socket.on("pin_message", async (data) => {
+    const { message_id,conversation_id } = data;
+    const conversation = await OneToOneMessage.findOne(
+      {_id:conversation_id}
+    );
+    conversation.messages.forEach((message) => {
+      if (message._id.toString() === message_id) {
+        message.isPin =!message.isPin;
+      }
+    })
+    await conversation.save();
+  });
   // -------------- HANDLE AUDIO CALL SOCKET EVENTS ----------------- //
 
   // handle start_audio_call event

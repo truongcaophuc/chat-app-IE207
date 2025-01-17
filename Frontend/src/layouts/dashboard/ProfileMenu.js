@@ -26,7 +26,7 @@ const ProfileMenu = () => {
   const user_id = window.localStorage.getItem("user_id");
 
   const user_name = user?.firstName+" "+user?.lastName;
-  const user_img = `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`;
+ 
 
   return (
     <>
