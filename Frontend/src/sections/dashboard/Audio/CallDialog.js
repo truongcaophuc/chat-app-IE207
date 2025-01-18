@@ -32,7 +32,8 @@ const CallDialog = ({ open, handleClose }) => {
     (state) => state.conversation.direct_chat
   );
   const [call_details] = useSelector((state) => state.audioCall.call_queue);
-  const { from, to } = call_details;
+
+  const { from, to } = call_details ?? {};
   const { incoming } = useSelector((state) => state.audioCall);
   const roomID = call_details?.roomID;
 

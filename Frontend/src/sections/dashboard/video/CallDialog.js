@@ -28,7 +28,7 @@ const CallDialog = ({ open, handleClose }) => {
     (state) => state.conversation.direct_chat
   );
   const [call_details] = useSelector((state) => state.videoCall.call_queue);
-  const { from, to } = call_details;
+  const { from, to } = call_details ?? {};
   const { incoming } = useSelector((state) => state.videoCall);
   const roomID = call_details?.roomID;
   const [statusCall, setStatusCall] = useState("Đang đổ chuông");

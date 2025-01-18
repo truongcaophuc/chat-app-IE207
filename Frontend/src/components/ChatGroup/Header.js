@@ -155,7 +155,7 @@ const ChatHeader = ({setShowSearchBar}) => {
               {displayMembers?.map((member, index) => (
                 <Avatar
                   key={index}
-                  src={member.avatarUrl}
+                  src={member.avatar}
                   round
                   size="25"
                   style={{

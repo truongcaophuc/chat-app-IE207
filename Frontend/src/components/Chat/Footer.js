@@ -89,7 +89,7 @@ const ChatInput = ({
               fileData: fileData,
               incoming: false,
               outgoing: true,
-              created_at: Date.now(),
+              created_at: new Date(Date.now()).toISOString(),
             },
             conversation_id: room_id,
           })

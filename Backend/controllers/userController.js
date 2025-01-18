@@ -50,7 +50,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 exports.getUsers = catchAsync(async (req, res, next) => {
   const all_users = await User.find({
     verified: true,
-  }).select("firstName lastName _id");
+  }).select("firstName lastName _id avatar");
   const this_user = req.user;
 
   const remaining_users = all_users.filter((user) => {

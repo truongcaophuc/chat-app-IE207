@@ -107,6 +107,7 @@ const SearchConversation = ({ messageRefs, setShowSearchBar }) => {
           >
             <Avatar
               name={msg.incoming ? current_conversation?.name : userName}
+              src={current_conversation.avatar}
               size={40}
               round={true}
             />

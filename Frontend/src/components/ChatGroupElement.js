@@ -108,7 +108,7 @@ const ChatGroupElement = ({ img, name, msg, time, unread, online, id }) => {
               {displayMembers?.map((member, index) => (
                 <Avatar
                   key={index}
-                  src={member.avatarUrl}
+                  src={member.avatar}
                   round
                   size="25"
                   style={{

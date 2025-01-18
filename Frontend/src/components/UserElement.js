@@ -51,7 +51,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const UserElement = ({
-  img,
+  avatar,
   firstName,
   lastName,
   online,
@@ -87,10 +87,10 @@ const UserElement = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={""} name={name} size={40} round={true} />
+              <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={""} name={name} size={40} round={true} />
+            <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
@@ -132,7 +132,7 @@ const UserElement = ({
 };
 
 const FriendRequestElement = ({
-  img,
+  avatar,
   firstName,
   lastName,
   incoming,
@@ -168,10 +168,10 @@ const FriendRequestElement = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={""} name={name} size={40} round={true} />
+              <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={""} name={name} size={40} round={true} />
+            <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>
@@ -195,7 +195,7 @@ const FriendRequestElement = ({
 // FriendElement
 
 const FriendElement = ({
-  img,
+  avatar,
   firstName,
   lastName,
   incoming,
@@ -231,10 +231,10 @@ const FriendElement = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={""} name={name} size={40} round={true} />
+              <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={""} name={name} size={40} round={true} />
+            <Avatar alt={name} src={avatar} name={name} size={40} round={true} />
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>

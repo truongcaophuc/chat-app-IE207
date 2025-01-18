@@ -198,6 +198,7 @@ const ChatComponent = ({ messageRefs, setShowSearchBar }) => {
   const { user_id } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [messageShare, setMessageShare] = useState("");
+  console.log("message share là",messageShare)
   const [searchText, setSearchText] = useState(""); // State để lưu giá trị tìm kiếm
   const handleSearchChange = (event) => {
     setSearchText(event.target.value); // Cập nhật giá trị khi người dùng nhập

@@ -1,36 +1,23 @@
-
 import { useRef } from "react";
 // form
 import { useFormContext, Controller } from "react-hook-form";
 // @mui
 import { Stack, TextField } from "@mui/material";
 
-
 export default function RHFCodes({ keyName = "", inputs = [], ...other }) {
   const codesRef = useRef(null);
-
   const { control } = useFormContext();
 
-  const handleChangeWithNextField = (event, handleChange) => {
-    const { maxLength, value, name } = event.target;
+  // Hàm xử lý thay đổi giá trị của ô nhập liệu
+  const handleChangeWithoutNextField = (event, handleChange) => {
+    const { maxLength, value } = event.target;
 
-    const fieldIndex = name.replace(keyName, "");
-
-    const fieldIntIndex = Number(fieldIndex);
-
-    const nextfield = document.querySelector(
-      `input[name=${keyName}${fieldIntIndex + 1}]`
-    );
-
+    // Kiểm tra nếu giá trị vượt quá maxLength
     if (value.length > maxLength) {
-      event.target.value = value[0];
+      event.target.value = value[0]; // Đảm bảo chỉ có một ký tự
     }
 
-    if (value.length >= maxLength && fieldIntIndex < 6 && nextfield !== null) {
-      nextfield.focus();
-    }
-
-    handleChange(event);
+    handleChange(event); // Gọi lại hàm xử lý
   };
 
   return (
@@ -47,7 +34,7 @@ export default function RHFCodes({ keyName = "", inputs = [], ...other }) {
               autoFocus={index === 0}
               placeholder="-"
               onChange={(event) => {
-                handleChangeWithNextField(event, field.onChange);
+                handleChangeWithoutNextField(event, field.onChange);
               }}
               onFocus={(event) => event.currentTarget.select()}
               InputProps={{
