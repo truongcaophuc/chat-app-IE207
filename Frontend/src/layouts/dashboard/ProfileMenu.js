@@ -33,7 +33,7 @@ const ProfileMenu = () => {
       <Avatar
         id="profile-positioned-button"
         alt={user_name}
-        src={""}
+        src={user.avatar}
         onClick={handleClick}
         name={user_name}
         round={true}

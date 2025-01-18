@@ -39,7 +39,7 @@ export default function MessageList({ messageRefs }) {
   const displayedPinnedMessages = showAllPinned
     ? pinnedMessages
     : pinnedMessages.slice(0, MAX_PINNED_DISPLAY);
-
+    
   return (
     <Box
       style={{

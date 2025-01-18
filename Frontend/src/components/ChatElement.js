@@ -46,7 +46,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
+const ChatElement = ({ avatar, name, msg, time, unread, online, id }) => {
   const dispatch = useDispatch();
   const { room_id } = useSelector((state) => state.app);
   const { conversations } = useSelector(
@@ -107,10 +107,10 @@ const ChatElement = ({ img, name, msg, time, unread, online, id }) => {
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
             >
-              <Avatar alt={name} src={""} name={name} size={40} round={true}/>
+              <Avatar alt={name} src={avatar} name={name} size={40} round={true}/>
             </StyledBadge>
           ) : (
-            <Avatar alt={name} src={""} name={name} size={40} round={true}/>
+            <Avatar alt={name} src={avatar} name={name} size={40} round={true}/>
           )}
           <Stack spacing={0.3}>
             <Typography variant="subtitle2">{name}</Typography>

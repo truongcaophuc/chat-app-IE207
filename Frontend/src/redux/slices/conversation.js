@@ -70,7 +70,7 @@ const slice = createSlice({
           user_id: user?._id,
           name: `${user?.firstName} ${user?.lastName}`,
           online: user?.status === "Online",
-          img: `https://gravatar.com/avatar/2a4edd140c41ba256d49c56e45883c99?s=400&d=robohash&r=x`,
+          avatar: user.avatar,
           msg:
             el.messages.slice(-1)[0]?.text ||
             el.messages.slice(-1)[0]?.fileName ||

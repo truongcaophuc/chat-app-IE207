@@ -37,7 +37,12 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-
+function splitName(fullName) {
+  const parts = fullName.trim().split(" ");
+  const firstName = parts[0]; // Lấy họ (phần đầu tiên)
+  const remainingName = parts.slice(1).join(" "); // Ghép các phần còn lại
+  return [firstName, remainingName];
+}
 mongoose
   .connect(
     "mongodb+srv://truongphuc:truongphuc@chat-application.8vkcg.mongodb.net/demo?retryWrites=true&w=majority&appName=Chat-application"
@@ -395,8 +400,8 @@ io.on("connection", async (socket) => {
   });
   socket.on("share_message", async (data) => {
     const { from, to, message } = data;
-    console.log("from là",from)
-    console.log("to là",to)
+    console.log("from là", from);
+    console.log("to là", to);
     to.map(async (user) => {
       const to_user = await User.findById(user);
       const new_message = {
@@ -409,26 +414,25 @@ io.on("connection", async (socket) => {
       const conversation = await OneToOneMessage.findOne({
         participants: { $all: [user, from] },
       });
-      console.log("conversation la", conversation._id)
+      console.log("conversation la", conversation._id);
       conversation.messages.push(new_message);
       await conversation.save();
       socket.to(to_user?.socket_id).emit("new_message", {
-        conversation_id:conversation._id,
+        conversation_id: conversation._id,
         message: new_message,
       });
     });
- 
   });
   socket.on("pin_message", async (data) => {
-    const { message_id,conversation_id } = data;
-    const conversation = await OneToOneMessage.findOne(
-      {_id:conversation_id}
-    );
+    const { message_id, conversation_id } = data;
+    const conversation = await OneToOneMessage.findOne({
+      _id: conversation_id,
+    });
     conversation.messages.forEach((message) => {
       if (message._id.toString() === message_id) {
-        message.isPin =!message.isPin;
+        message.isPin = !message.isPin;
       }
-    })
+    });
     await conversation.save();
   });
   // -------------- HANDLE AUDIO CALL SOCKET EVENTS ----------------- //
@@ -729,7 +733,7 @@ io.on("connection", async (socket) => {
     // broadcast to all conversation rooms of this user that this user is offline (disconnected)
 
     console.log("closing connection");
-    socket.disconnect(0);
+    //socket.disconnect(0);
   });
 });
 

@@ -104,11 +104,18 @@ const slice = createSlice({
           (inv) => inv !== invitation
         );
     },
+    updateProfile(state, action) {
+      const {avatar,name}=action.payload
+      state.user.avatar=avatar
+      state.user.firstName=name
+      state.user.lastName=""
+    }
   },
 });
 export const {
   unFriend,
-  resetGroup
+  resetGroup,
+  updateProfile
 } = slice.actions;
 // Reducer
 export default slice.reducer;
@@ -151,9 +158,7 @@ export function UpdateTab(tab) {
 }
 
 export function FetchUsers() {
-  console.log("vai");
   return async (dispatch, getState) => {
-    console.log("token là :", getState().auth.token);
     await axios
       .get(
         "/user/get-users",
@@ -166,7 +171,6 @@ export function FetchUsers() {
         }
       )
       .then((response) => {
-        console.log("Thông tin user là :", response.data);
         dispatch(slice.actions.updateUsers({ users: response.data.data }));
       })
       .catch((err) => {
@@ -313,37 +317,6 @@ export const FetchUserProfile = () => {
       .then((response) => {
         console.log(response);
         dispatch(slice.actions.fetchUser({ user: response.data.data }));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-};
-export const UpdateUserProfile = (formValues) => {
-  return async (dispatch, getState) => {
-    const file = formValues.avatar;
-
-    const key = v4();
-
-    try {
-    } catch (error) {
-      console.log(error);
-    }
-
-    axios
-      .patch(
-        "/user/update-me",
-        { ...formValues, avatar: key },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getState().auth.token}`,
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response);
-        dispatch(slice.actions.updateUser({ user: response.data.data }));
       })
       .catch((err) => {
         console.log(err);

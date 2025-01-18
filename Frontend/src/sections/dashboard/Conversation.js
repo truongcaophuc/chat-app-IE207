@@ -161,7 +161,7 @@ const TextMsg = ({ el, menu, messageRefs, method }) => {
     >
       {el.incoming && el.incoming != prev_message?.incoming && (
         <Avatar
-          src={``}
+          src={current_conversation.avatar}
           round
           size="30"
           name={current_conversation.name}
@@ -189,7 +189,7 @@ const TextMsg = ({ el, menu, messageRefs, method }) => {
           </Typography>
         </Box>
         {is_last_message && new_conversation?.isSeen && el.outgoing && (
-          <Avatar src={``} round size="15" name={current_conversation.name} />
+          <Avatar src={current_conversation.avatar} round size="15" name={current_conversation.name} />
         )}
       </Stack>
       {menu && <MessageOption method={method} data={el} />}

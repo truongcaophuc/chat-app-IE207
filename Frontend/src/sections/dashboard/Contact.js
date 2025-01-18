@@ -156,7 +156,7 @@ const Contact = () => {
           spacing={3}
         >
           <Stack alignItems="center" direction="row" spacing={2}>
-            <Avatar name={current_conversation?.name} size={64} round={true} />
+            <Avatar name={current_conversation?.name} size={64} round={true} src={current_conversation?.avatar}/>
             <Stack spacing={0.5}>
               <Typography variant="article" fontWeight={600}>
                 {current_conversation?.name}

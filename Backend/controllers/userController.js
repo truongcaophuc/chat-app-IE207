@@ -4,9 +4,14 @@ const User = require("../models/user");
 const VideoCall = require("../models/videoCall");
 const catchAsync = require("../utils/catchAsync");
 const filterObj = require("../utils/filterObj");
-
+const cloudinary = require("cloudinary").v2;
 const { generateToken04 } = require("./zegoServerAssistant");
-
+function splitName(fullName) {
+  const parts = fullName.trim().split(" ");
+  const firstName = parts[0]; // Lấy họ (phần đầu tiên)
+  const remainingName = parts.slice(1).join(" "); // Ghép các phần còn lại
+  return [firstName, remainingName];
+}
 // Please change appID to your appId, appid is a number
 // Example: 1234567890
 const appID = process.env.ZEGO_APP_ID; // type: number
@@ -23,21 +28,23 @@ exports.getMe = catchAsync(async (req, res, next) => {
 });
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  const filteredBody = filterObj(
-    req.body,
-    "firstName",
-    "lastName",
-    "about",
-    "avatar"
-  );
-
-  const userDoc = await User.findByIdAndUpdate(req.user._id, filteredBody);
-
-  res.status(200).json({
-    status: "success",
-    data: userDoc,
-    message: "User Updated successfully",
-  });
+  const { avatar, name } = req.body;
+  const user = await User.findOne({ _id: req.user._id });
+  try {
+    const result = await cloudinary.uploader.upload(avatar, {
+      folder: "avatar",
+      resource_type: "auto", // Cloudinary sẽ tự động nhận diện loại file
+    });
+    user.avatar = result.secure_url;
+    const formatName = splitName(name);
+    user.firstName = formatName[0];
+    user.lastName = formatName[1];
+    console.log(result.secure_url)
+  } catch (error) {
+    console.error("Error uploading to Cloudinary:", error);
+    throw error;
+  }
+  await user.save();
 });
 
 exports.getUsers = catchAsync(async (req, res, next) => {

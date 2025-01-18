@@ -139,7 +139,7 @@ const ChatHeader = ({setShowSearchBar}) => {
                 >
                   <Avatar
                     alt={current_conversation?.name}
-                    src={""}
+                    src={current_conversation?.avatar}
                     name={current_conversation?.name}
                     size={40}
                     round={true}
@@ -148,7 +148,7 @@ const ChatHeader = ({setShowSearchBar}) => {
               ) : (
                 <Avatar
                   alt={current_conversation?.name}
-                  src={""}
+                  src={current_conversation?.avatar}
                   name={current_conversation?.name}
                   size={40}
                   round={true}
